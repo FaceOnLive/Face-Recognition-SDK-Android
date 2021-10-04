@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/settings_preview_adapt">
+
+        <PreferenceScreen app:title="@string/title_camera_preview_adapt">
+            <intent
+                android:action="android.intent.action.MAIN"
+                android:targetClass="com.ttv.facedemo.ui.activity.CameraConfigureActivity"
+                android:targetPackage="com.ttv.facedemo" />
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

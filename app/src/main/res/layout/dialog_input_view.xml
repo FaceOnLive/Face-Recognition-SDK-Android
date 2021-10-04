@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/back700">
+    <TextView
+        android:text="Change Name"
+        android:textSize="20sp"
+        android:fontFamily="@font/poppins"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:layout_marginTop="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <ImageView
+        android:id="@+id/iv_head"
+        android:layout_gravity="center"
+        android:layout_width="@dimen/item_image_size"
+        android:layout_marginTop="12dp"
+        android:layout_height="@dimen/item_image_size"/>
+    <EditText
+        android:layout_margin="@dimen/common_margin"
+        android:id="@+id/et_user_name"
+        android:textColor="@color/white"
+        android:fontFamily="@font/poppins"
+        android:backgroundTint="@color/back400"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

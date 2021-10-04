@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.activity.FaceManageActivity">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:background="@color/back700"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:text="@{@string/tip_no_registered_face(Constants.DEFAULT_REGISTER_FACES_DIR)}"
+                android:visibility="@{(hasFace==null||hasFace)?View.INVISIBLE:View.VISIBLE}" />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_face_photo"
+                tools:listitem="@layout/recycler_item_face_photo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </FrameLayout>
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_scrollFlags="scroll|enterAlways"
+                app:title="@string/page_face_manage" />
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/fab_margin"
+            android:tint="@color/white"
+            app:srcCompat="@drawable/ic_add" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <data>
+
+        <import type="android.view.View" />
+        <import type="com.ttv.facedemo.common.Constants" />
+
+        <variable
+            name="faceEntityList"
+            type="java.util.List&lt;com.ttv.facedemo.facedb.entity.FaceEntity&gt;" />
+
+        <variable
+            name="hasFace"
+            type="Boolean" />
+    </data>
+</layout>

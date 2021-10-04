@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory app:title="@string/title_dual_camera_data_offset">
+        <SeekBarPreference
+            android:max="@integer/max_offset"
+            app:min="@integer/min_offset"
+            app:key="@string/preference_dual_camera_offset_horizontal"
+            app:showSeekBarValue="true"
+            app:updatesContinuously="true"
+            app:title="@string/title_dual_camera_data_offset_horizontal" />
+        <SeekBarPreference
+            android:max="@integer/max_offset"
+            app:min="@integer/min_offset"
+            app:key="@string/preference_dual_camera_offset_vertical"
+            app:showSeekBarValue="true"
+            app:updatesContinuously="true"
+            app:title="@string/title_dual_camera_data_offset_vertical" />
+    </PreferenceCategory>
+</PreferenceScreen>

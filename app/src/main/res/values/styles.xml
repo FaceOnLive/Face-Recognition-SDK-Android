@@ -1,0 +1,38 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/back700</item>
+        <item name="colorPrimaryDark">@color/back700</item>
+        <item name="colorAccent">@color/back400</item>
+        <item name="android:textColorPrimary">#808080</item>
+        <item name="android:textColorSecondary">#707070</item>
+    </style>
+
+    <style name="FullScreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="HintErrorTextStyle" parent="TextAppearance.AppCompat">
+    　　<item name="android:textColor">@android:color/holo_red_dark</item>
+    </style>
+    <style name="HintNormalTextStyle" parent="TextAppearance.AppCompat">
+    　　<item name="android:textColor">@color/colorAccent</item>
+    </style>
+</resources>

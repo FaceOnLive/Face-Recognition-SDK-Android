@@ -1,0 +1,70 @@
+<resources>
+    <string-array name="recognize_orient_priority_values">
+        <item>TTV_OP_0_ONLY</item>
+        <item>TTV_OP_90_ONLY</item>
+        <item>TTV_OP_180_ONLY</item>
+        <item>TTV_OP_270_ONLY</item>
+        <item>TTV_OP_ALL_OUT</item>
+    </string-array>
+
+
+    <string-array name="recognize_orient_priority_desc">
+        <item>0</item>
+        <item>90</item>
+        <item>180</item>
+        <item>270</item>
+        <item>All Direction</item>
+    </string-array>
+
+    <!-- 识别最大人数 -->
+    <string-array name="recognize_max_num_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
+    <!-- 识别最小人脸比例 -->
+    <string-array name="recognize_scale_values">
+        <item>4</item>
+        <item>8</item>
+        <item>16</item>
+        <item>32</item>
+    </string-array>
+
+    <!-- 活体检测类型 -->
+    <string-array name="liveness_detect_with_ir_types">
+        <item>@string/description_rgb_liveness_detect</item>
+        <item>@string/description_ir_liveness_detect</item>
+        <item>@string/description_disable_liveness_detect</item>
+    </string-array>
+    <string-array name="liveness_detect_type_with_ir_values">
+        <item>@string/value_liveness_type_rgb</item>
+        <item>@string/value_liveness_type_ir</item>
+        <item>@string/value_liveness_type_disable</item>
+    </string-array>
+
+    <string-array name="liveness_detect_no_ir_types">
+        <item>@string/description_rgb_liveness_detect</item>
+        <item>@string/description_disable_liveness_detect</item>
+    </string-array>
+    <string-array name="liveness_detect_type_no_ir_values">
+        <item>@string/value_liveness_type_rgb</item>
+        <item>@string/value_liveness_type_disable</item>
+    </string-array>
+
+    <!--人脸管理界面Dialog操作-->
+    <string-array name="face_manage_operations">
+        <item>@string/register_select_from_album</item>
+        <item>@string/batch_register_from_file</item>
+        <item>@string/clear_all_faces</item>
+    </string-array>
+
+    <string-array name="camera_preview_additional_rotation">
+        <item>0</item>
+        <item>90</item>
+        <item>180</item>
+        <item>270</item>
+    </string-array>
+</resources>

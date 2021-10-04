@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center">
+    <RadioGroup
+        android:padding="@dimen/dialog_padding_size"
+        android:background="@android:color/white"
+        android:id="@+id/radio_group_ft_orient"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <RadioButton
+            android:text="@string/ft_op_0"
+            android:id="@+id/rb_orient_0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:text="@string/ft_op_90"
+            android:id="@+id/rb_orient_90"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:text="@string/ft_op_180"
+            android:id="@+id/rb_orient_180"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:text="@string/ft_op_270"
+            android:id="@+id/rb_orient_270"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:text="@string/ft_op_all"
+            android:id="@+id/rb_orient_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RadioGroup>
+    <include layout="@layout/include_close_dialog"/>
+</LinearLayout>

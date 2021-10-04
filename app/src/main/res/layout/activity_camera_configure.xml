@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        tools:context=".ui.activity.CameraConfigureActivity">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:id="@+id/fl_camera_config_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="horizontal">
+
+                    <FrameLayout
+                        android:id="@+id/fl_rgb_preview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent">
+
+                        <TextureView
+                            android:id="@+id/texture_view_rgb"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <com.ttv.facedemo.widget.FaceRectView
+                            android:id="@+id/face_rect_view_rgb"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:id="@+id/fl_ir_preview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent">
+
+                        <TextureView
+                            android:id="@+id/texture_view_ir"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <com.ttv.facedemo.widget.FaceRectView
+                            android:id="@+id/face_rect_view_ir"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/fl_preview_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="horizontal">
+
+                    <com.ttv.facedemo.util.camera.glsurface.CameraGLSurfaceView
+                        android:id="@+id/gl_surface_view_rgb"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <com.ttv.facedemo.util.camera.glsurface.CameraGLSurfaceView
+                        android:id="@+id/gl_surface_view_ir"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:id="@+id/fl_dual_camera_offset_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+        </ScrollView>
+
+    </FrameLayout>
+</layout>

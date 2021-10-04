@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/dual_camera_ll_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/back700">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start">
+
+            <TextureView
+                android:id="@+id/dual_camera_texture_preview_rgb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <com.ttv.facedemo.widget.FaceRectView
+                android:id="@+id/dual_camera_face_rect_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <FrameLayout
+                android:id="@+id/fl_recognize_ir"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom">
+
+                <TextureView
+                    android:id="@+id/dual_camera_texture_preview_ir"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <com.ttv.facedemo.widget.FaceRectView
+                    android:id="@+id/dual_camera_face_rect_view_ir"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </FrameLayout>
+
+        </FrameLayout>
+
+        <Button
+
+            android:drawableTop="@drawable/ic_settings"
+            android:drawablePadding="12dp"
+            android:drawableTint="@color/back400"
+            android:paddingVertical="12dp"
+            android:paddingHorizontal="12dp"
+            android:textColor="@color/white"
+            android:fontFamily="@font/poppins"
+            android:background="@color/back700"
+
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_margin="@dimen/common_margin"
+            android:onClick="setting"
+            android:text="@string/recognize_settings" />
+
+    </FrameLayout>
+</layout>

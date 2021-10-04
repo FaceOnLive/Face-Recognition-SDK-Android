@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/back700"
+    android:orientation="vertical">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_margin="20dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <Button
+
+                android:drawableTop="@drawable/ic_image"
+                android:drawablePadding="12dp"
+                android:drawableTint="@color/back400"
+                android:paddingVertical="12dp"
+                android:textAllCaps="false"
+                android:paddingHorizontal="12dp"
+                android:textColor="@color/white"
+                android:fontFamily="@font/poppins"
+                android:background="@color/back700"
+
+
+                android:id="@+id/bt_choose_main_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="chooseMainImage"
+                android:text="@string/choose_main_image"/>
+            <ImageView
+                android:id="@+id/iv_main_image"
+                android:layout_width="wrap_content"
+                android:layout_marginVertical="12dp"
+                android:layout_height="wrap_content"
+                android:minHeight="100dp"
+                android:maxHeight="200dp"/>
+            <TextView
+                android:textColor="@color/white"
+                android:fontFamily="@font/poppins"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_main_image_info"/>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/back500"/>
+        <LinearLayout
+            android:layout_margin="20dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+            <Button
+
+                android:drawableTop="@drawable/ic_add"
+                android:drawablePadding="12dp"
+                android:drawableTint="@color/back400"
+                android:paddingVertical="12dp"
+                android:textAllCaps="false"
+                android:paddingHorizontal="12dp"
+                android:textColor="@color/white"
+                android:fontFamily="@font/poppins"
+                android:background="@color/back700"
+
+
+
+                android:id="@+id/bt_add_item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="addItemFace"
+                android:text="@string/add_item_image"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:minHeight="300dp"
+                android:id="@+id/recycler_faces"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

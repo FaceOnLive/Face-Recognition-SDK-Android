@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="navigate_item_height">56dp</dimen>
+    <dimen name="label_margin">12dp</dimen>
+    <dimen name="tips_horizontal_margin">12dp</dimen>
+    <dimen name="toolbar_height">56dp</dimen>
+    <dimen name="dialog_padding_size">12dp</dimen>
+    <dimen name="btn_close_margin_size">6dp</dimen>
+    <dimen name="common_margin">20dp</dimen>
+    <dimen name="item_image_size">80dp</dimen>
+    <dimen name="item_face_margin">10dp</dimen>
+    <dimen name="item_head_image_padding">10dp</dimen>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="appbar_padding">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="appbar_padding_top">8dp</dimen>
+
+    <dimen name="face_count_notification_size">56dp</dimen>
+    <dimen name="text_size_calculate_result">16sp</dimen>
+    <dimen name="text_size_item_user_name">16sp</dimen>
+
+    <dimen name="default_icon_size">24dp</dimen>
+    <dimen name="clickable_icon_size">32dp</dimen>
+    <dimen name="iv_camera_shot">100dp</dimen>
+    <dimen name="preference_image_size">56dp</dimen>
+
+    <dimen name="logo_width">292dp</dimen>
+    <dimen name="logo_height">108dp</dimen>
+
+    <dimen name="navigate_item_title_text_size">16sp</dimen>
+    <dimen name="max_notice_width">200dp</dimen>
+    <dimen name="attr_image_max_height">400dp</dimen>
+
+    <dimen name="text_size_13sp">13dp</dimen>
+    <dimen name="title_bar_height">54dp</dimen>
+</resources>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/dual_camera_ll_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/back700">
+
+        <FrameLayout
+            android:id="@+id/frameLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="start"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/dual_camera_recycler_view_person"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextureView
+                android:id="@+id/dual_camera_texture_preview_rgb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <com.ttv.facedemo.widget.FaceRectView
+                android:id="@+id/dual_camera_face_rect_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <FrameLayout
+                android:id="@+id/fl_recognize_ir"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom">
+
+                <TextureView
+                    android:id="@+id/dual_camera_texture_preview_ir"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <com.ttv.facedemo.widget.FaceRectView
+                    android:id="@+id/dual_camera_face_rect_view_ir"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </FrameLayout>
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/common_margin"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/frameLayout"
+            app:layout_constraintStart_toStartOf="@+id/frameLayout">
+
+            <Button
+
+                android:drawableTop="@drawable/ic_eye"
+                android:drawablePadding="12dp"
+                android:drawableTint="@color/back400"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="12dp"
+                android:textColor="@color/white"
+                android:fontFamily="@font/poppins"
+                android:background="@color/back700"
+
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="openRectInfoDraw"
+                android:text="@{drawRectInfoText}" />
+
+            <Button
+                android:drawableTop="@drawable/ic_record"
+                android:drawablePadding="12dp"
+                android:drawableTint="@color/back400"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="12dp"
+                android:textColor="@color/white"
+                android:fontFamily="@font/poppins"
+                android:background="@color/back700"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="register"
+                android:text="@string/register" />
+
+            <Button
+
+                android:drawableTop="@drawable/ic_settings"
+                android:drawablePadding="12dp"
+                android:drawableTint="@color/back400"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="12dp"
+                android:textColor="@color/white"
+                android:fontFamily="@font/poppins"
+                android:background="@color/back700"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="setting"
+                android:text="@string/recognize_settings" />
+
+        </LinearLayout>
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/dual_camera_recycler_view_person"
+            android:layout_width="0dp"
+
+            android:layout_height="wrap_content"
+            app:compareResultList="@{compareResultList}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/frameLayout" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:paddingHorizontal="6dp"
+            android:background="@color/color_black_shadow"
+            android:text="@{recognizeNotice}"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:fontFamily="@font/poppins"
+            android:layout_marginBottom="12dp"
+            android:visibility="@{(recognizeNotice == null || recognizeNotice.length() == 0)?View.GONE:View.VISIBLE}"
+            app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+            app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+            app:layout_constraintStart_toStartOf="@+id/linearLayout" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <data>
+
+        <variable
+            name="compareResultList"
+            type="java.util.List&lt;com.ttv.facedemo.ui.model.CompareResult&gt;" />
+
+        <variable
+            name="recognizeNotice"
+            type="String" />
+
+        <variable
+            name="drawRectInfoText"
+            type="String" />
+
+        <import type="android.view.View" />
+    </data>
+</layout>

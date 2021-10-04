@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ttv.facedemo">
+
+    <application
+        android:requestLegacyExternalStorage="true"
+        android:name="com.ttv.facedemo.TTVFaceApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name="com.ttv.facedemo.ui.activity.LivenessDetectActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/FullScreenTheme" />
+        <activity
+            android:name="com.ttv.facedemo.ui.activity.CameraConfigureActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/FullScreenTheme" />
+        <activity
+            android:name="com.ttv.facedemo.ui.activity.RecognizeSettingsActivity"
+            android:label="@string/page_settings"
+            android:launchMode="singleTop" />
+        <activity android:name="com.ttv.facedemo.ui.activity.HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.ttv.facedemo.ui.activity.FaceManageActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.ttv.facedemo.ui.activity.RegisterAndRecognizeActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/FullScreenTheme" />
+        <activity
+            android:name="com.ttv.facedemo.ui.activity.ImageFaceAttrDetectActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/FullScreenTheme" />
+        <activity
+            android:name="com.ttv.facedemo.ui.activity.FaceCompareActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/FullScreenTheme" />
+
+        <activity
+            android:name="com.ttv.facedemo.ui.activity.ActivationActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/FullScreenTheme" />
+
+        <activity
+            android:name="qrcode.QrCodeActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/FullScreenTheme" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+    </application>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+</manifest>

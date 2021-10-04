@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory app:title="@string/title_draw_rect_adaptation">
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="@string/preference_draw_rgb_rect_horizontal_mirror"
+            app:summaryOff="@string/description_draw_origin"
+            app:summaryOn="@string/description_draw_mirror"
+            app:title="@string/title_mirror_draw_rgb_rect_horizontal" />
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="@string/preference_draw_rgb_rect_vertical_mirror"
+            app:summaryOff="@string/description_draw_origin"
+            app:summaryOn="@string/description_draw_mirror"
+            app:title="@string/title_mirror_draw_rgb_rect_vertical" />
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="@string/preference_draw_ir_rect_horizontal_mirror"
+            app:summaryOff="@string/description_draw_origin"
+            app:summaryOn="@string/description_draw_mirror"
+            app:title="@string/title_mirror_draw_ir_rect_horizontal" />
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="@string/preference_draw_ir_rect_vertical_mirror"
+            app:summaryOff="@string/description_draw_origin"
+            app:summaryOn="@string/description_draw_mirror"
+            app:title="@string/title_mirror_draw_ir_rect_vertical" />
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="@string/preference_rgb_preview_horizontal_mirror"
+            app:summaryOff="@string/description_draw_origin"
+            app:summaryOn="@string/description_draw_mirror"
+            app:title="@string/title_rgb_preview_horizontal_mirror" />
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="@string/preference_ir_preview_horizontal_mirror"
+            app:summaryOff="@string/description_draw_origin"
+            app:summaryOn="@string/description_draw_mirror"
+            app:title="@string/title_ir_preview_horizontal_mirror" />
+    </PreferenceCategory>
+</PreferenceScreen>

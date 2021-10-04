@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="200dp"
+    android:gravity="center_horizontal"
+    android:layout_gravity="center_vertical"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <ImageView
+        android:background="?attr/selectableItemBackground"
+        android:layout_gravity="center_vertical"
+        android:id="@+id/iv_live_decrease"
+        android:src="@drawable/ic_decrease"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <EditText
+        android:gravity="center"
+        android:inputType="number"
+        android:maxLength="4"
+        android:textSize="16dp"
+        android:id="@android:id/edit"
+        android:layout_width="64dp"
+        android:layout_height="wrap_content"/>
+    <ImageView
+        android:background="?attr/selectableItemBackground"
+        android:layout_gravity="center_vertical"
+        android:id="@+id/iv_live_increase"
+        android:src="@drawable/ic_increase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

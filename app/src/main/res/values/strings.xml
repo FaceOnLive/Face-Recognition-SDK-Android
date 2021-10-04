@@ -1,0 +1,259 @@
+<resources>
+    <string name="app_name">TTVFaceDemo</string>
+
+
+    <!--Dialogs-->
+    <string name="loading">Loading…</string>
+    <string name="please_wait">Please wait…</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="undo">Undo</string>
+    <string name="stopped">Stopped</string>
+    <string name="stop">Stop</string>
+    <string name="notice">Notice</string>
+
+    <!--README Related-->
+    <string name="title_introduction">Introduction</string>
+    <string name="desc_scale_value">Scale</string>
+    <string name="desc_orient">Detection angle</string>
+    <string name="desc_detect_mode">Detection mode</string>
+    <string name="desc_error_code">Error code</string>
+    <string name="desc_face_rect_comparison">Face rect comparison</string>
+
+    <string name="original_preview_data">Original Screen\n（Not rotated, mirrored, only zoomed）</string>
+    <string name="adapted_preview_data">Preview screen\n（May be rotated, mirrored, scaled）</string>
+    <string name="rect_not_adapted_for_draw">Rect not adapted for drawing</string>
+    <string name="rect_adapted_for_draw">Rect adapted for drawing</string>
+
+    <string name="recognize_settings">Settings</string>
+
+    <string name="library_not_found">The library file is not found, please check whether the .so file is placed in the app\src\main\jniLibs directory of the project.</string>
+
+    <string name="get_picture_failed">Failed to get picture</string>
+
+    <string name="permission_denied">Permission denied!</string>
+
+    <string name="init_failed">Engine initialization failed，Error Code：%d，Message：%s</string>
+    <string name="engine_not_initialized">The engine is not initialized, the error code is %d</string>
+
+    <string name="start_process">Attribute analysis</string>
+    <string name="choose_local_image">Choose image</string>
+    <string name="processing">Processing..</string>
+
+    <string name="register">Register</string>
+    <string name="switch_camera">Switch Camera</string>
+    <string name="switch_camera_failed">Switch Camera Failed</string>
+    <string name="recognize_failed_notice">Recognize Failed:%s</string>
+    <string name="recognize_success_notice">Recognize Succeed:%s</string>
+    <string name="low_confidence_level">Low Confidence Level</string>
+    <string name="specific_engine_init_failed">%s Init Failed，Error Code：%d\nMessage：%s</string>
+    <string name="notice_change_detect_degree">The camera has been switched, if the face not detected, you need to modify the video mode face detection angle in the configuration interface</string>
+    <string name="liveness_detect">Liveness Detection</string>
+    <string name="camera_rgb">RGB CAMERA</string>
+    <string name="camera_ir">IR CAMERA</string>
+    <string name="camera_rgb_preview_size">RGB CAMERA\n%dx%d</string>
+    <string name="camera_ir_preview_size">IR CAMERA\n%dx%d</string>
+    <string name="camera_error_notice">\nPossible cause: The device does not support opening two cameras at the same time</string>
+    <string name="draw_ir_rect_mirror_horizontal">IR Face horizontal mirror drawing</string>
+    <string name="draw_ir_rect_mirror_vertical">IR Face vertical mirror drawing</string>
+
+    <string name="page_readme">Read Me</string>
+    <string name="page_ir_face_recognize">Face Recognition</string>
+    <string name="page_liveness_detect">Liveness Detection</string>
+    <string name="page_single_image">Face Analysis</string>
+    <string name="page_face_compare">1:1 Matching</string>
+    <string name="page_face_manage">User Management</string>
+    <string name="page_settings">Settings</string>
+    <string name="page_debug">Debug</string>
+    <string name="page_calculate_data_length">Calculate Data Length</string>
+
+
+    <string name="tip_no_registered_face">Please click the icon in the lower right corner to register，\nDefault Registration Directory：%s</string>
+    <string name="please_put_photos">Please put photos in \n%s\n</string>
+    <string name="label_face_id">id: %d</string>
+    <string name="dialog_title_change_name">Change Name</string>
+    <string name="name_should_not_be_empty">Please input name.</string>
+    <string name="register_success">Register Succeed.</string>
+    <string name="register_failed">Register Failed</string>
+    <string name="face_cleared">Face Cleared</string>
+    <string name="face_deleted">Face Deleted</string>
+    <string name="register_select_from_album">Select from gallery</string>
+    <string name="batch_register_from_file">Batch Register from folder</string>
+    <string name="clear_all_faces">Clear all faces</string>
+    <string name="registering_please_wait">Registering, please wait..</string>
+    <string name="register_progress">Current/Failed/All：%d / %d / %d</string>
+
+    <!--1:n（image vs image）-->
+    <string name="choose_main_image">Choose main image</string>
+    <string name="add_item_image">Add image</string>
+    <string name="notice_choose_main_img">Please choose image</string>
+    <string name="notice_register_image_no_mask">Please choose image without mask</string>
+    <string name="compare_failed">Matching failed，Error Code %d</string>
+
+    <!-- Dump-->
+    <string name="dump_error_cannot_detect_faces">Can\'t detect faces</string>
+    <string name="dump_liveness_info">Liveness Info</string>
+    <string name="dump_extract_failed">Extract Failed</string>
+    <string name="dump_recognize_failed">Recognize Failed</string>
+    <string name="dump_performance_info">Performance Info</string>
+
+    <!-- Image Size-->
+    <string name="notice_input_width">Please enter image width</string>
+    <string name="large_resolution_not_recommended">It is not recommended to use too large resolution images</string>
+    <string name="width_must_be_multiple_of_4">The width must be a multiple of 4</string>
+    <string name="notice_input_height">Please enter image height</string>
+    <string name="calculate">Calculate</string>
+    <string name="image_width">Image Width</string>
+    <string name="image_height">Image Height</string>
+    <string name="threshold_value_illegal">Threshold illegal</string>
+    <string name="interger_value_illegal">Integer illegal</string>
+
+
+    <!-- Settings -->
+
+    <string name="ft_op_0">Video mode only detects 0 degrees</string>
+    <string name="ft_op_90">Video mode only detects 90 degrees</string>
+    <string name="ft_op_180">Video mode only detects 180 degrees</string>
+    <string name="ft_op_270">Video mode only detects 270 degrees</string>
+    <string name="ft_op_all">Video mode omnidirectional face detection</string>
+
+    <string name="dialog_delete_face_config">Are you sure to remove \'%s\' \'s face?</string>
+    <string name="label_face_manage">User Management</string>
+
+    <!-- Configured subtitle -->
+    <string name="settings_preview_adapt">Camera preview settings</string>
+    <string name="settings_recognize_orient">Recognition angle setting</string>
+    <string name="settings_liveness">Liveness detection settings</string>
+    <string name="setting_recognize">Recognition settings</string>
+    <string name="face_attr_setting_threshold_recognize">Face attribute threshold setting</string>
+    <string name="settings_recognize_scale">Face detection size setting</string>
+    <string name="title_image_quality_detect">Image quality inspection settings</string>
+    <string name="title_face_size_limit">Face size limit during recognition</string>
+    <string name="title_face_move_limit">Face movement restriction during recognition</string>
+    <string name="title_camera_preview_adapt">Camera resolution, angle, etc. adaptation</string>
+
+    <!-- Preference key-->
+    <string name="preference_switch_camera">switch_camera</string>
+    <string name="preference_dual_camera_offset_horizontal">dual_camera_offset_horizontal</string>
+    <string name="preference_dual_camera_offset_vertical">dual_camera_offset_vertical</string>
+    <string name="preference_draw_rgb_rect_horizontal_mirror">draw_rgb_rect_horizontal_mirror</string>
+    <string name="preference_draw_rgb_rect_vertical_mirror">draw_rgb_rect_vertical_mirror</string>
+    <string name="preference_draw_ir_rect_horizontal_mirror">draw_ir_rect_horizontal_mirror</string>
+    <string name="preference_draw_ir_rect_vertical_mirror">draw_ir_rect_vertical_mirror</string>
+    <string name="preference_rgb_preview_horizontal_mirror">rgb_preview_horizontal_mirror</string>
+    <string name="preference_ir_preview_horizontal_mirror">ir_preview_horizontal_mirror</string>
+    <string name="preference_rgb_camera_rotation">rgb_camera_rotation</string>
+    <string name="preference_ir_camera_rotation">ir_camera_rotation</string>
+    <string name="preference_liveness_detect_type">liveness_detect_type</string>
+    <string name="preference_rgb_liveness_detect">rgb_liveness_detect</string>
+    <string name="preference_ir_liveness_detect">ir_liveness_detect</string>
+    <string name="preference_recognize_keep_max_face">keep_max_face</string>
+    <string name="preference_recognize_limit_recognize_area">limit_recognize_area</string>
+    <string name="preference_recognize_max_detect_num">max_detect_num</string>
+    <string name="preference_recognize_scale_value">scale_value</string>
+    <string name="preference_choose_detect_degree">choose_detect_degree</string>
+    <string name="preference_track_face_count">track_face_count</string>
+    <string name="preference_recognize_threshold">recognize_threshold</string>
+    <string name="preference_shelter_threshold">shelter_threshold</string>
+    <string name="preference_eye_open_threshold">eye_open_threshold</string>
+    <string name="preference_mouth_close_threshold">mouth_close_threshold</string>
+    <string name="preference_wear_glasses_threshold">wear_glasses_threshold</string>
+    <string name="preference_recognize_face_size_limit">recognize_face_size_limit</string>
+    <string name="preference_recognize_move_pixel_limit">recognize_move_pixel_limit</string>
+    <string name="preference_rgb_liveness_threshold">rgb_liveness_threshold</string>
+    <string name="preference_ir_liveness_threshold">ir_liveness_threshold</string>
+    <string name="preference_liveness_fq_threshold">liveness_fq_threshold</string>
+    <string name="preference_rgb_liveness_face_size_threshold">rgb_liveness_face_size_threshold</string>
+    <string name="preference_ir_liveness_face_size_threshold">ir_liveness_face_size_threshold</string>
+    <string name="preference_dual_camera_preview_size">dual_camera_preview_size</string>
+    <string name="preference_app_id">app_id</string>
+    <string name="preference_sdk_key">sdk_key</string>
+    <string name="preference_active_key">active_key</string>
+    <string name="preference_enable_image_quality_detect">enable_image_quality_detect</string>
+    <string name="preference_enable_face_size_limit">enable_face_size_limit</string>
+    <string name="preference_enable_face_move_limit">enable_face_move_limit</string>
+    <string name="preference_image_quality_no_mask_recognize_threshold">image_quality_no_mask_recognize_threshold</string>
+    <string name="preference_image_quality_no_mask_register_threshold">image_quality_no_mask_register_threshold</string>
+    <string name="preference_image_quality_mask_recognize_threshold">image_quality_mask_recognize_threshold</string>
+
+    <!-- Identify related configuration items-->
+    <string name="title_choose_detect_degree">Select the video mode to detect the angle</string>
+    <string name="title_liveness_detect_type">Liveness detection mode</string>
+    <string name="title_rgb_threshold">RGB threshold</string>
+    <string name="title_ir_threshold">IR threshold</string>
+    <string name="title_liveness_fq_threshold">Liveness detection threshold</string>
+    <string name="title_rgb_liveness_face_size">RGB Liveness Face Size</string>
+    <string name="title_ir_liveness_face_size">IR Liveness Face Size</string>
+    <string name="title_recognize_face_count_limit">Limit on the number of faces recognized on the same screen</string>
+    <string name="title_max_detect_face_num">Maximum number of face detections on the recognition interface</string>
+    <string name="title_recognize_scale_value">The minimum face ratio during recognition (image width / face width)</string>
+    <string name="title_recognize_area_limit">Recognition area restrictions</string>
+    <string name="title_recognize_threshold">Recognition threshold</string>
+    <string name="title_recognize_face_side_length_limit">Face size limit(px)</string>
+    <string name="title_recognize_face_move_pixel_limit">Limit on the number of moving pixels in the next frame</string>
+    <string name="title_shelter_threshold">Occlusion threshold</string>
+    <string name="title_eye_open_threshold">Eye opening threshold</string>
+    <string name="title_mouth_close_threshold">Mouth close threshold</string>
+    <string name="title_wear_glasses_threshold">Wear glasses threshold</string>
+    <!-- Camera adaptation related configuration items-->
+    <string name="title_rgb_preview_additional_rotation">RGB preview additional rotation angle</string>
+    <string name="title_ir_preview_additional_rotation">IR preview additional rotation angle</string>
+    <string name="title_draw_rect_adaptation">Face frame drawing adaptation</string>
+    <string name="title_dual_camera_data_offset">Binocular shift (based on image, not View)</string>
+    <string name="title_dual_camera_data_offset_horizontal">Binocular horizontal offset pixel</string>
+    <string name="title_dual_camera_data_offset_vertical">Binocular vertical offset pixel</string>
+    <string name="title_camera_preview_adaption">Camera preview</string>
+    <string name="title_mirror_draw_rgb_rect_horizontal">Mirror and draw visible light face frame horizontally</string>
+    <string name="title_mirror_draw_rgb_rect_vertical">Mirror and draw visible light face frame vertically</string>
+    <string name="title_mirror_draw_ir_rect_horizontal">Draw infrared face frame with horizontal mirroring</string>
+    <string name="title_mirror_draw_ir_rect_vertical">Draw infrared face frame with vertical mirroring</string>
+    <string name="title_rgb_preview_horizontal_mirror">RGB data preview</string>
+    <string name="title_ir_preview_horizontal_mirror">IR data preview</string>
+    <string name="title_switch_camera">Switch Camera</string>
+    <string name="title_dual_camera_preview_size">Binocular resolution</string>
+    <string name="title_image_quality_no_mask_recognize_threshold">No mask recognize threshold</string>
+    <string name="title_image_quality_no_mask_register_threshold">No mask register threshold</string>
+    <string name="title_image_quality_mask_recognize_threshold">Mask recognize threshold</string>
+
+
+    <string name="description_recognize_keep_max_face">Only recognize the largest face</string>
+    <string name="description_recognize_not_keep_max_face">Recognize multiple faces at the same time</string>
+    <string name="description_recognize_no_area_limited">Unrestricted recognition area</string>
+    <string name="description_recognize_area_limited">Restricted recognition area</string>
+    <string name="description_draw_mirror">Mirror drawing</string>
+    <string name="description_draw_origin">Original drawing</string>
+    <string name="description_camera_0_ir_1_rgb">0:IR, 1:RGB</string>
+    <string name="description_camera_0_rgb_1_ir">0:RGB, 1:IR</string>
+    <string name="description_image_quality_detect_enabled">Enable image quality inspection</string>
+    <string name="description_image_quality_detect_disabled">Disable image quality detection</string>
+    <string name="description_face_size_limit_enabled">Enable face size restriction</string>
+    <string name="description_face_size_limit_disabled">Disable face size restriction</string>
+    <string name="description_face_size_move_enabled">Enable face movement restriction</string>
+    <string name="description_face_size_move_disabled">Disable face movement restriction</string>
+
+    <string name="value_liveness_type_rgb">rgb_liveness</string>
+    <string name="value_liveness_type_ir">ir_liveness</string>
+    <string name="value_liveness_type_disable">disable_liveness</string>
+
+    <string name="description_rgb_liveness_detect">RGB live detection</string>
+    <string name="description_ir_liveness_detect">RGB + IR live detection</string>
+    <string name="description_disable_liveness_detect">Disable liveness detection</string>
+
+    <string name="default_recognize_orient_priority">TTV_OP_ALL_OUT</string>
+    <string name="title_activity_scan_qr_code">Scan QrCode</string>
+    <string name="qc_code_close">Close</string>
+    <string name="qr_code_select_picture">Select Picture</string>
+    <string name="qr_code_open_flash_light">Open Flash Light</string>
+    <string name="qr_code_close_flash_light">Close Flash Light</string>
+    <string name="qr_code_auto_scan_notification"></string>
+    <string name="qr_code_notification">Notification</string>
+    <string name="qr_code_camera_not_open">Camera not open!</string>
+    <string name="qr_code_positive_button_know">Ok</string>
+    <string name="qr_code_positive_button_confirm">Confirm</string>
+    <string name="qr_code_could_not_read_qr_code_from_picture">Could not read qrcode from picture</string>
+    <string name="qr_code_could_not_read_qr_code_from_scanner">Could not read qrcode from scanner</string>
+    <string name="qr_code_camera_not_found">Camera not found</string>
+
+
+</resources>
