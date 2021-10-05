@@ -10,7 +10,8 @@
 <a href="https://play.google.com/store/apps/details?id=com.ttv.facedemo" target="_blank">
   <img alt="Get it on Google Play" src="https://goo.gl/cR2qQH" height="100"/>
 </a>
-
+</br>
+</br>
 
 ## :clap:  Supporters
 [![Stargazers repo roster for @faceonlive/Mask-Aware-Face-Recognition-SDK-Android](https://reporoster.com/stars/faceonlive/Mask-Aware-Face-Recognition-SDK-Android)](https://github.com/faceonlive/Mask-Aware-Face-Recognition-SDK-Android/stargazers)
