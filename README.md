@@ -14,5 +14,5 @@
 
 ## :clap:  Supporters
 [![Stargazers repo roster for @faceonlive/Mask-Aware-Face-Recognition-SDK-Android](https://reporoster.com/stars/faceonlive/Mask-Aware-Face-Recognition-SDK-Android)](https://github.com/faceonlive/Mask-Aware-Face-Recognition-SDK-Android/stargazers)
-[![Forkers repo roster for @faceonlive/Mask-Aware-Face-Recognition-SDK-Android](https://reporoster.com/forks/nastyofaceonlive/Mask-Aware-Face-Recognition-SDK-Android)](https://github.com/faceonlive/Mask-Aware-Face-Recognition-SDK-Android/network/members)
+[![Forkers repo roster for @faceonlive/Mask-Aware-Face-Recognition-SDK-Android](https://reporoster.com/forks/faceonlive/Mask-Aware-Face-Recognition-SDK-Android)](https://github.com/faceonlive/Mask-Aware-Face-Recognition-SDK-Android/network/members)
 <p align="center"><a href="https://github.com/nastyox/Rando.js#nastyox"><img src="http://randojs.com/images/barsSmallTransparentBackground.gif" alt="Animated footer bars" width="100%"/></a></p>
