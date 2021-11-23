@@ -136,7 +136,7 @@ public class HomeActivity extends BaseActivity  {
     }
 
     public void RequestPermission_Dialog() {
-        if (SDK_INT >= Build.VERSION_CODES.R) {
+        /*if (SDK_INT >= Build.VERSION_CODES.R) {
             try {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
                 intent.addCategory("android.intent.category.DEFAULT");
@@ -147,7 +147,7 @@ public class HomeActivity extends BaseActivity  {
                 obj.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
                 startActivityForResult(obj, 2000);
             }
-        } else {
+        } else */{
             ActivityCompat.requestPermissions(HomeActivity.this, new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, 1);
         }
     }
