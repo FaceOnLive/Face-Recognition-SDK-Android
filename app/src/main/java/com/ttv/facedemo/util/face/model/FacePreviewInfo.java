@@ -3,23 +3,21 @@ package com.ttv.facedemo.util.face.model;
 import android.graphics.Rect;
 
 import com.ttv.face.FaceInfo;
+import com.ttv.face.FaceResult;
 import com.ttv.face.LivenessInfo;
 
 public class FacePreviewInfo {
-    private FaceInfo faceInfoRgb;
-    private FaceInfo faceInfoIr;
+    private FaceResult faceInfoRgb;
     private Rect rgbTransformedRect;
 
     private Rect irTransformedRect;
     private int rgbLiveness = LivenessInfo.UNKNOWN;
-    private int irLiveness = LivenessInfo.UNKNOWN;
     private float imageQuality = 0f;
     private boolean recognizeAreaValid;
     private int trackId;
     private boolean qualityPass = true;
 
     private int mask;
-
     private Rect foreRect;
 
     public Rect getForeRect() {
@@ -30,16 +28,16 @@ public class FacePreviewInfo {
         this.foreRect = foreRect;
     }
 
-    public FacePreviewInfo(FaceInfo faceInfoRgb, int trackId) {
+    public FacePreviewInfo(FaceResult faceInfoRgb, int trackId) {
         this.faceInfoRgb = faceInfoRgb;
         this.trackId = trackId;
     }
 
-    public FaceInfo getFaceInfoRgb() {
+    public FaceResult getFaceInfoRgb() {
         return faceInfoRgb;
     }
 
-    public void setFaceInfoRgb(FaceInfo faceInfoRgb) {
+    public void setFaceInfoRgb(FaceResult faceInfoRgb) {
         this.faceInfoRgb = faceInfoRgb;
     }
 
@@ -76,28 +74,12 @@ public class FacePreviewInfo {
         this.recognizeAreaValid = recognizeAreaValid;
     }
 
-    public void setFaceInfoIr(FaceInfo faceInfoIr) {
-        this.faceInfoIr = faceInfoIr;
-    }
-
-    public FaceInfo getFaceInfoIr() {
-        return faceInfoIr;
-    }
-
     public int getRgbLiveness() {
         return rgbLiveness;
     }
 
     public void setRgbLiveness(int rgbLiveness) {
         this.rgbLiveness = rgbLiveness;
-    }
-
-    public int getIrLiveness() {
-        return irLiveness;
-    }
-
-    public void setIrLiveness(int irLiveness) {
-        this.irLiveness = irLiveness;
     }
 
     public void setImageQuality(float imageQuality) {

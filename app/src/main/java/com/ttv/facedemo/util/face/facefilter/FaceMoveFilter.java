@@ -33,7 +33,7 @@ public class FaceMoveFilter implements FaceRecognizeFilter {
             if (rectDeque.remainingCapacity() == 0) {
                 rectDeque.removeLast();
             }
-            rectDeque.push(facePreviewInfo.getFaceInfoRgb().getRect());
+            rectDeque.push(facePreviewInfo.getFaceInfoRgb().rect);
 
             if (!facePreviewInfo.isQualityPass()) {
                 continue;

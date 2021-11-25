@@ -21,23 +21,13 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ttv.face.FaceEngine;
+import com.ttv.face.FaceResult;
 import com.ttv.facedemo.R;
 import com.ttv.facedemo.ui.adapter.MultiFaceInfoAdapter;
 import com.ttv.facedemo.ui.model.ItemShowInfo;
-import com.ttv.facedemo.util.ConfigUtil;
-import com.ttv.facedemo.util.ErrorCodeUtil;
-import com.ttv.face.AgeInfo;
-import com.ttv.face.ErrorInfo;
-import com.ttv.face.FaceSDK;
-import com.ttv.face.FaceFeature;
-import com.ttv.face.FaceInfo;
-import com.ttv.face.FaceSimilar;
 import com.ttv.face.GenderInfo;
-import com.ttv.face.ImageQualitySimilar;
 import com.ttv.face.MaskInfo;
-import com.ttv.face.enums.DetectFaceOrientPriority;
-import com.ttv.face.enums.DetectMode;
-import com.ttv.face.enums.ExtractType;
 import com.ttv.imageutil.TTVImageFormat;
 import com.ttv.imageutil.TTVImageUtil;
 import com.ttv.imageutil.TTVImageUtilError;
@@ -55,8 +45,6 @@ public class FaceCompareActivity extends BaseActivity {
     private static final int ACTION_CHOOSE_MAIN_IMAGE = 0x201;
     private static final int ACTION_ADD_RECYCLER_ITEM_IMAGE = 0x202;
     private static final int ACTION_REQUEST_PERMISSIONS = 0x001;
-    private static final int INIT_MASK = FaceSDK.TTV_FACE_RECOGNITION | FaceSDK.TTV_FACE_DETECT | FaceSDK.TTV_GENDER |
-            FaceSDK.TTV_AGE | FaceSDK.TTV_MASK_DETECT | FaceSDK.TTV_IMAGEQUALITY;
 
     private ImageView ivMainImage;
     private TextView tvMainImageInfo;
@@ -65,12 +53,9 @@ public class FaceCompareActivity extends BaseActivity {
     private static final int TYPE_MAIN = 0;
     private static final int TYPE_ITEM = 1;
 
-    private FaceFeature mainFeature;
+    private byte[] mainFeature;
     private MultiFaceInfoAdapter multiFaceInfoAdapter;
     private List<ItemShowInfo> showInfoList;
-
-    private FaceSDK mainFaceEngine;
-    private int faceEngineCode = -1;
     private Bitmap mainBitmap;
 
     private String[] neededPermissions = new String[]{
@@ -108,19 +93,9 @@ public class FaceCompareActivity extends BaseActivity {
     }
 
     private void initEngine() {
-        mainFaceEngine = new FaceSDK(this);
-        faceEngineCode = mainFaceEngine.init(this, DetectMode.TTV_DETECT_MODE_IMAGE, DetectFaceOrientPriority.TTV_OP_ALL_OUT,
-                6, INIT_MASK);
-        if (faceEngineCode != ErrorInfo.MOK) {
-            showToast(getString(R.string.init_failed, faceEngineCode, ErrorCodeUtil.ttvErrorCodeToFieldName(faceEngineCode)));
-        }
     }
 
     private void unInitEngine() {
-        if (mainFaceEngine != null) {
-            faceEngineCode = mainFaceEngine.unInit();
-            Log.i(TAG, "unInitEngine: " + faceEngineCode);
-        }
     }
 
     @Override
@@ -173,29 +148,22 @@ public class FaceCompareActivity extends BaseActivity {
         if (bitmap == null) {
             return;
         }
-        if (mainFaceEngine == null) {
-            return;
-        }
+
         bitmap = TTVImageUtil.getAlignedBitmap(bitmap, true);
         if (bitmap == null) {
             return;
         }
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
         byte[] bgr24 = TTVImageUtil.createImageData(bitmap.getWidth(), bitmap.getHeight(), TTVImageFormat.BGR24);
         int transformCode = TTVImageUtil.bitmapToImageData(bitmap, bgr24, TTVImageFormat.BGR24);
         if (transformCode != TTVImageUtilError.CODE_SUCCESS) {
             showToast("failed to transform bitmap to imageData, code is " + transformCode);
             return;
         }
-        List<FaceInfo> faceInfoList = new ArrayList<>();
-        int detectCode = mainFaceEngine.detectFaces(bgr24, width, height, FaceSDK.CP_PAF_BGR24, faceInfoList);
-        if (detectCode != 0 || faceInfoList.isEmpty()) {
-            showToast("face detection finished, code is " + detectCode + ", face num is " + faceInfoList.size());
-            return;
-        }
-        bitmap = bitmap.copy(Bitmap.Config.RGB_565, true);
-        Canvas canvas = new Canvas(bitmap);
+        List<FaceResult> faceInfoList = new ArrayList<>();
+        faceInfoList = FaceEngine.getInstance(this).detectFace(bitmap);
+
+        Bitmap bitmap565 = bitmap.copy(Bitmap.Config.RGB_565, true);
+        Canvas canvas = new Canvas(bitmap565);
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setStrokeWidth(10);
@@ -204,33 +172,18 @@ public class FaceCompareActivity extends BaseActivity {
         if (!faceInfoList.isEmpty()) {
             for (int i = 0; i < faceInfoList.size(); i++) {
                  paint.setStyle(Paint.Style.STROKE);
-                canvas.drawRect(faceInfoList.get(i).getRect(), paint);
+                canvas.drawRect(faceInfoList.get(i).rect, paint);
                 paint.setStyle(Paint.Style.FILL_AND_STROKE);
-                paint.setTextSize((float) faceInfoList.get(i).getRect().width() / 2);
-                canvas.drawText("" + i, faceInfoList.get(i).getRect().left, faceInfoList.get(i).getRect().top, paint);
+                paint.setTextSize((float) faceInfoList.get(i).rect.width() / 2);
+                canvas.drawText("" + i, faceInfoList.get(i).rect.left, faceInfoList.get(i).rect.top, paint);
             }
         }
-        int faceProcessCode = mainFaceEngine.process(bgr24, width, height, FaceSDK.CP_PAF_BGR24, faceInfoList,
-                FaceSDK.TTV_AGE | FaceSDK.TTV_GENDER | FaceSDK.TTV_MASK_DETECT);
-        if (faceProcessCode != ErrorInfo.MOK) {
-            showToast("face process finished, code is " + faceProcessCode);
-            return;
-        }
-        List<AgeInfo> ageInfoList = new ArrayList<>();
-        List<GenderInfo> genderInfoList = new ArrayList<>();
-        List<MaskInfo> maskInfoList = new ArrayList<>();
-        int ageCode = mainFaceEngine.getAge(ageInfoList);
-        int genderCode = mainFaceEngine.getGender(genderInfoList);
-        int maskInfoCode = mainFaceEngine.getMask(maskInfoList);
-        if ((ageCode | genderCode | maskInfoCode) != ErrorInfo.MOK) {
-            showToast("at lease one of age、gender、mask detect failed! codes are: " + ageCode
-                    + " ," + genderCode + " ," + maskInfoCode);
-            return;
-        }
 
+
+        FaceEngine.getInstance(this).faceAttrProcess(bitmap, faceInfoList);
         int isMask = MaskInfo.UNKNOWN;
-        if (!maskInfoList.isEmpty()) {
-            isMask = maskInfoList.get(0).getMask();
+        if (!faceInfoList.isEmpty()) {
+            isMask = faceInfoList.get(0).mask;
         }
 
         if (isMask == MaskInfo.UNKNOWN) {
@@ -243,44 +196,17 @@ public class FaceCompareActivity extends BaseActivity {
             return;
         }
 
-        ImageQualitySimilar imageQualitySimilar = new ImageQualitySimilar();
-        int qualityCode = mainFaceEngine.imageQualityDetect(bgr24, width, height, FaceSDK.CP_PAF_BGR24, faceInfoList.get(0),
-                isMask, imageQualitySimilar);
-        if (qualityCode != ErrorInfo.MOK) {
-            showToast("imageQualityDetect failed! code is " + qualityCode);
-            return;
-        }
-        float quality = imageQualitySimilar.getScore();
-        float destQuality;
-        if (type == TYPE_MAIN) {
-
-            destQuality = ConfigUtil.getImageQualityNoMaskRegisterThreshold(this);
-        } else {
-
-            if (isMask == MaskInfo.WORN) {
-
-                destQuality = ConfigUtil.getImageQualityMaskRecognizeThreshold(this);
-            } else {
-
-                destQuality = ConfigUtil.getImageQualityNoMaskRecognizeThreshold(this);
-            }
-        }
-        if (quality < destQuality) {
-            showToast("image quality invalid");
-            return;
-        }
-
         if (!faceInfoList.isEmpty()) {
             if (type == TYPE_MAIN) {
                 int size = showInfoList.size();
                 showInfoList.clear();
                 multiFaceInfoAdapter.notifyItemRangeRemoved(0, size);
-                mainFeature = new FaceFeature();
-                int res = mainFaceEngine.extractFaceFeature(bgr24, width, height, FaceSDK.CP_PAF_BGR24, faceInfoList.get(0),
-                        ExtractType.REGISTER, isMask, mainFeature);
-                if (res != ErrorInfo.MOK) {
-                    mainFeature = null;
-                }
+                mainFeature = null;
+                FaceEngine.getInstance(this).extractFeature(bitmap, true, faceInfoList);
+
+                if(faceInfoList.size() > 0)
+                    mainFeature = faceInfoList.get(0).feature;
+
                 Glide.with(ivMainImage.getContext())
                         .load(bitmap)
                         .into(ivMainImage);
@@ -289,35 +215,32 @@ public class FaceCompareActivity extends BaseActivity {
                     stringBuilder.append("face info:\n\n");
                 }
                 for (int i = 0; i < faceInfoList.size(); i++) {
+
+                    String angleInfo = "Face3DAngle{yaw=" + faceInfoList.get(i).yaw + ", roll=" + faceInfoList.get(i).roll + ", pitch=" + faceInfoList.get(i).pitch + '}';
+                    String faceInfo = "FaceInfo{faceRect=" + faceInfoList.get(i).rect.toString() + ", orient=" + faceInfoList.get(i).orient + ", " + angleInfo + '}';
+
                     stringBuilder.append("face[")
                             .append(i)
                             .append("]:\n")
-                            .append(faceInfoList.get(i))
+                            .append(faceInfo)
                             .append("\nage:")
-                            .append(ageInfoList.get(i).getAge())
+                            .append(faceInfoList.get(i).age)
                             .append("\ngender:")
-                            .append(genderInfoList.get(i).getGender() == GenderInfo.MALE ? "MALE"
-                                    : (genderInfoList.get(i).getGender() == GenderInfo.FEMALE ? "FEMALE" : "UNKNOWN"))
+                            .append(faceInfoList.get(i).gender == GenderInfo.MALE ? "MALE"
+                                    : (faceInfoList.get(i).gender == GenderInfo.FEMALE ? "FEMALE" : "UNKNOWN"))
                             .append("\nmaskInfo:")
-                            .append(maskInfoList.get(i).getMask() == MaskInfo.WORN ? "Mask"
-                                    : (maskInfoList.get(i).getMask() == MaskInfo.NOT_WORN ? "No Mask" : "UNKNOWN"))
+                            .append(faceInfoList.get(i).mask == MaskInfo.WORN ? "Mask"
+                                    : (faceInfoList.get(i).mask == MaskInfo.NOT_WORN ? "No Mask" : "UNKNOWN"))
                             .append("\n\n");
                 }
                 tvMainImageInfo.setText(stringBuilder);
             } else if (type == TYPE_ITEM) {
-                FaceFeature faceFeature = new FaceFeature();
-                int res = mainFaceEngine.extractFaceFeature(bgr24, width, height, FaceSDK.CP_PAF_BGR24, faceInfoList.get(0),
-                        ExtractType.RECOGNIZE, isMask, faceFeature);
-                if (res == 0) {
-                    FaceSimilar faceSimilar = new FaceSimilar();
-                    int compareResult = mainFaceEngine.compareFaceFeature(mainFeature, faceFeature, faceSimilar);
-                    if (compareResult == ErrorInfo.MOK) {
-                        ItemShowInfo showInfo = new ItemShowInfo(bitmap, ageInfoList.get(0).getAge(), genderInfoList.get(0).getGender(), faceSimilar.getScore());
-                        showInfoList.add(showInfo);
-                        multiFaceInfoAdapter.notifyItemInserted(showInfoList.size() - 1);
-                    } else {
-                        showToast(getString(R.string.compare_failed, compareResult));
-                    }
+                FaceEngine.getInstance(this).extractFeature(bitmap, false, faceInfoList);
+                if(faceInfoList.size() > 0) {
+                    float score = FaceEngine.getInstance(this).compareFeature(mainFeature, faceInfoList.get(0).feature);
+                    ItemShowInfo showInfo = new ItemShowInfo(bitmap, faceInfoList.get(0).age, faceInfoList.get(0).gender, score);
+                    showInfoList.add(showInfo);
+                    multiFaceInfoAdapter.notifyItemInserted(showInfoList.size() - 1);
                 }
             }
         } else {
@@ -334,10 +257,6 @@ public class FaceCompareActivity extends BaseActivity {
     }
 
     public void addItemFace(View view) {
-        if (faceEngineCode != ErrorInfo.MOK) {
-            showToast(getString(R.string.engine_not_initialized, faceEngineCode));
-            return;
-        }
         if (mainBitmap == null) {
             showToast(getString(R.string.notice_choose_main_img));
             return;
@@ -346,11 +265,6 @@ public class FaceCompareActivity extends BaseActivity {
     }
 
     public void chooseMainImage(View view) {
-
-        if (faceEngineCode != ErrorInfo.MOK) {
-            showToast(getString(R.string.engine_not_initialized, faceEngineCode));
-            return;
-        }
         chooseLocalImage(ACTION_CHOOSE_MAIN_IMAGE);
     }
 

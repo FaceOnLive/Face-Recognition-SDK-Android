@@ -12,5 +12,5 @@ public interface FaceListener {
 
     void onFaceFeatureInfoGet(@Nullable FaceFeature faceFeature, Integer trackId, Integer errorCode);
 
-    void onFaceLivenessInfoGet(@Nullable LivenessInfo livenessInfo, Integer trackId, Integer errorCode);
+    void onFaceLivenessInfoGet(int liveness, Integer trackId, Integer errorCode);
 }

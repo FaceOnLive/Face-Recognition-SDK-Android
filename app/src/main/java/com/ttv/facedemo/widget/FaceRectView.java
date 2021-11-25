@@ -80,7 +80,7 @@ public class FaceRectView extends View {
         private String name = null;
         private boolean drawRectInfo;
         private Rect foreheadRect;
-        private FaceAttributeInfo faceAttributeInfo;
+        private boolean showAttrInfo;
         private boolean rgbRect;
 
         public DrawInfo(Rect rect, int sex, int age, int liveness, int color, String name) {
@@ -93,7 +93,7 @@ public class FaceRectView extends View {
         }
 
         public DrawInfo(Rect rect, int sex, int age, int liveness, int color, String name, int isWithinBoundary, Rect foreheadRect,
-                        FaceAttributeInfo faceAttributeInfo, boolean drawRectInfo, boolean rgbRect, int maskInfo) {
+                        boolean showAttrInfo, boolean drawRectInfo, boolean rgbRect, int maskInfo) {
             this.rect = rect;
             this.sex = sex;
             this.age = age;
@@ -104,7 +104,7 @@ public class FaceRectView extends View {
             this.isWithinBoundary = isWithinBoundary;
             this.drawRectInfo = drawRectInfo;
             this.foreheadRect = foreheadRect;
-            this.faceAttributeInfo = faceAttributeInfo;
+            this.showAttrInfo = showAttrInfo;
             this.rgbRect = rgbRect;
         }
 
@@ -186,12 +186,12 @@ public class FaceRectView extends View {
             this.foreheadRect = foreheadRect;
         }
 
-        public FaceAttributeInfo getFaceAttributeInfo() {
-            return faceAttributeInfo;
+        public boolean isShowAttrInfo() {
+            return showAttrInfo;
         }
 
-        public void setFaceAttributeInfo(FaceAttributeInfo faceAttributeInfo) {
-            this.faceAttributeInfo = faceAttributeInfo;
+        public void setFaceAttributeInfo(boolean showAttrInfo) {
+            this.showAttrInfo = showAttrInfo;
         }
 
         public int getIsWithinBoundary() {
@@ -250,18 +250,15 @@ public class FaceRectView extends View {
         }
 
         if (drawInfo.drawRectInfo && drawInfo.rgbRect) {
-            FaceAttributeInfo attributeInfo = drawInfo.getFaceAttributeInfo();
-            if (attributeInfo != null) {
-                paint.setStyle(Paint.Style.FILL_AND_STROKE);
-                int textSize = rect.width() / 8;
-                paint.setStrokeWidth(1);
-                paint.setTextSize(textSize);
-                int defX = rect.left;
-                int defY = rect.bottom + rect.width() / 8;
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            int textSize = rect.width() / 8;
+            paint.setStrokeWidth(1);
+            paint.setTextSize(textSize);
+            int defX = rect.left;
+            int defY = rect.bottom + rect.width() / 8;
 
-                String strInfo1 = "Mask: " + (drawInfo.getMaskInfo() == 1 ? "Yes" : "No");
-                canvas.drawText(strInfo1, defX, defY, paint);
-            }
+            String strInfo1 = "Mask: " + (drawInfo.getMaskInfo() == 1 ? "Yes" : "No");
+            canvas.drawText(strInfo1, defX, defY, paint);
         }
     }
 

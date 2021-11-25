@@ -127,7 +127,8 @@ public class ActivationActivity extends BaseActivity implements View.OnClickList
                 if (grantResults.length > 0) {
                     boolean storage = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     boolean read = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    if (storage && read) {
+                    boolean phoneState = grantResults[2] == PackageManager.PERMISSION_GRANTED;
+                    if (storage && read && phoneState) {
                         openNewScreen();
                     } else {
                         //permission denied
@@ -297,7 +298,6 @@ public class ActivationActivity extends BaseActivity implements View.OnClickList
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         Log.e(TAG, "requestCode = " + requestCode + " resultCode = " + resultCode);
         switch (requestCode) {
             case 0: {

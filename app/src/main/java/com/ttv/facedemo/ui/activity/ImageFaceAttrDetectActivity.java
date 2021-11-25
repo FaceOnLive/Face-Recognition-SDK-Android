@@ -24,12 +24,13 @@ import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
 
+import com.ttv.face.FaceEngine;
+import com.ttv.face.FaceResult;
 import com.ttv.facedemo.R;
 import com.ttv.facedemo.util.ErrorCodeUtil;
 import com.ttv.facedemo.util.ImageUtil;
 import com.ttv.face.AgeInfo;
 import com.ttv.face.ErrorInfo;
-import com.ttv.face.FaceSDK;
 import com.ttv.face.FaceInfo;
 import com.ttv.face.GenderInfo;
 import com.ttv.face.LivenessInfo;
@@ -56,11 +57,6 @@ public class ImageFaceAttrDetectActivity extends BaseActivity {
     private static final String TAG = "ImageFaceAttrDetect";
     private ImageView ivShow;
     private TextView tvNotice;
-    private FaceSDK faceEngine;
-    private int faceEngineCode = -1;
-
-    int processMask = FaceSDK.TTV_AGE | FaceSDK.TTV_GENDER | FaceSDK.TTV_LIVENESS | FaceSDK.TTV_MASK_DETECT;
-
     private AlertDialog progressDialog;
     private Bitmap mBitmap = null;
     private static String[] NEEDED_PERMISSIONS = new String[]{
@@ -86,22 +82,10 @@ public class ImageFaceAttrDetectActivity extends BaseActivity {
     }
 
     private void initEngine() {
-        faceEngine = new FaceSDK(this);
-        faceEngineCode = faceEngine.init(this, DetectMode.TTV_DETECT_MODE_IMAGE, DetectFaceOrientPriority.TTV_OP_ALL_OUT,
-                5, FaceSDK.TTV_FACE_RECOGNITION | FaceSDK.TTV_FACE_DETECT | processMask);
-        Log.i(TAG, "initEngine: init: " + faceEngineCode);
-
-        if (faceEngineCode != ErrorInfo.MOK) {
-            showToast(getString(R.string.init_failed, faceEngineCode, ErrorCodeUtil.ttvErrorCodeToFieldName(faceEngineCode)));
-        }
     }
 
     private void unInitEngine() {
-        if (faceEngine != null) {
-            faceEngineCode = faceEngine.unInit();
-            faceEngine = null;
-            Log.i(TAG, "unInitEngine: " + faceEngineCode);
-        }
+
     }
 
     @Override
@@ -172,18 +156,8 @@ public class ImageFaceAttrDetectActivity extends BaseActivity {
         Bitmap bitmap = TTVImageUtil.getAlignedBitmap(mBitmap, true);
 
         final SpannableStringBuilder notificationSpannableStringBuilder = new SpannableStringBuilder();
-        if (faceEngineCode != ErrorInfo.MOK) {
-            addNotificationInfo(notificationSpannableStringBuilder, null, " face engine not initialized!");
-            showNotificationAndFinish(notificationSpannableStringBuilder);
-            return;
-        }
         if (bitmap == null) {
             addNotificationInfo(notificationSpannableStringBuilder, null, " bitmap is null!");
-            showNotificationAndFinish(notificationSpannableStringBuilder);
-            return;
-        }
-        if (faceEngine == null) {
-            addNotificationInfo(notificationSpannableStringBuilder, null, " faceEngine is null!");
             showNotificationAndFinish(notificationSpannableStringBuilder);
             return;
         }
@@ -199,40 +173,34 @@ public class ImageFaceAttrDetectActivity extends BaseActivity {
             addNotificationInfo(notificationSpannableStringBuilder, new StyleSpan(Typeface.BOLD), "transform bitmap To ImageData failed", "code is ", String.valueOf(transformCode), "\n");
             return;
         }
-//        Log.i(TAG, "processImage:bitmapToBgr24 cost =  " + (System.currentTimeMillis() - start));
         addNotificationInfo(notificationSpannableStringBuilder, new StyleSpan(Typeface.BOLD), "start face detection,imageWidth is ", String.valueOf(width), ", imageHeight is ", String.valueOf(height), "\n");
 
-        List<FaceInfo> faceInfoList = new ArrayList<>();
-
         long fdStartTime = System.currentTimeMillis();
-//        TTVImageInfo ttvImageInfo = new TTVImageInfo(width,height,FaceEngine.CP_PAF_BGR24,new byte[][]{bgr24},new int[]{width * 3});
-//        Log.i(TAG, "processImage: " + ttvImageInfo.getPlanes()[0].length);
-//        int detectCode = faceEngine.detectFaces(ttvImageInfo, faceInfoList);
-        int detectCode = faceEngine.detectFaces(bgr24, width, height, FaceSDK.CP_PAF_BGR24, DetectModel.RGB, faceInfoList);
-        if (detectCode == ErrorInfo.MOK) {
-//            Log.i(TAG, "processImage: fd costTime = " + (System.currentTimeMillis() - fdStartTime));
-        }
+        List<FaceResult> faceResults = FaceEngine.getInstance(this).detectFace(bitmap);
 
         Bitmap bitmapForDraw = bitmap.copy(Bitmap.Config.RGB_565, true);
         Canvas canvas = new Canvas(bitmapForDraw);
         Paint paint = new Paint();
-        addNotificationInfo(notificationSpannableStringBuilder, null, "detect result:\nerrorCode is :", String.valueOf(detectCode), "   face Number is ", String.valueOf(faceInfoList.size()), "\n");
+        addNotificationInfo(notificationSpannableStringBuilder, null, "detect result:\n", "   face Number is ", String.valueOf(faceResults.size()), "\n");
 
-        if (faceInfoList.size() > 0) {
+        if (faceResults.size() > 0) {
             addNotificationInfo(notificationSpannableStringBuilder, null, "face list:\n");
             paint.setAntiAlias(true);
             paint.setStrokeWidth(5);
             paint.setColor(Color.YELLOW);
-            for (int i = 0; i < faceInfoList.size(); i++) {
+            for (int i = 0; i < faceResults.size(); i++) {
                 paint.setStyle(Paint.Style.STROKE);
-                canvas.drawRect(faceInfoList.get(i).getRect(), paint);
+                canvas.drawRect(faceResults.get(i).rect, paint);
 
                 paint.setStyle(Paint.Style.FILL_AND_STROKE);
-                int textSize = faceInfoList.get(i).getRect().width() / 2;
+                int textSize = faceResults.get(i).rect.width() / 2;
                 paint.setTextSize(textSize);
 
-                canvas.drawText(String.valueOf(i), faceInfoList.get(i).getRect().left, faceInfoList.get(i).getRect().top - 10, paint);
-                addNotificationInfo(notificationSpannableStringBuilder, null, "face[", String.valueOf(i), "]:", faceInfoList.get(i).toString(), "\n");
+                canvas.drawText(String.valueOf(i), faceResults.get(i).rect.left, faceResults.get(i).rect.top - 10, paint);
+
+                String angleInfo = "Face3DAngle{yaw=" + faceResults.get(i).yaw + ", roll=" + faceResults.get(i).roll + ", pitch=" + faceResults.get(i).pitch + '}';
+                String faceInfo = "FaceInfo{faceRect=" + faceResults.get(i).rect.toString() + ", orient=" + faceResults.get(i).orient + ", " + angleInfo + '}';
+                addNotificationInfo(notificationSpannableStringBuilder, null, "face[", String.valueOf(i), "]:", faceInfo, "\n");
             }
             final Bitmap finalBitmapForDraw = bitmapForDraw;
             runOnUiThread(() -> Glide.with(ivShow.getContext())
@@ -247,53 +215,37 @@ public class ImageFaceAttrDetectActivity extends BaseActivity {
 
 
         long processStartTime = System.currentTimeMillis();
-        int faceProcessCode = faceEngine.process(bgr24, width, height, FaceSDK.CP_PAF_BGR24, faceInfoList, processMask);
+        int faceProcessCode = FaceEngine.getInstance(this).faceAttrProcess(bitmap, faceResults);
 
         if (faceProcessCode != ErrorInfo.MOK) {
             addNotificationInfo(notificationSpannableStringBuilder, new ForegroundColorSpan(Color.RED), "process failed! code is ", String.valueOf(faceProcessCode), "\n");
         } else {
             Log.i(TAG, "processImage: process costTime = " + (System.currentTimeMillis() - processStartTime));
         }
-        List<AgeInfo> ageInfoList = new ArrayList<>();
-        List<GenderInfo> genderInfoList = new ArrayList<>();
-        List<LivenessInfo> livenessInfoList = new ArrayList<>();
-        List<MaskInfo> maskInfoList = new ArrayList<>();
-        int ageCode = faceEngine.getAge(ageInfoList);
-        int genderCode = faceEngine.getGender(genderInfoList);
-        int livenessCode = faceEngine.getLiveness(livenessInfoList);
-        int maskCode = faceEngine.getMask(maskInfoList);
 
-        if ((ageCode | genderCode | livenessCode | maskCode) != ErrorInfo.MOK) {
-            addNotificationInfo(notificationSpannableStringBuilder, null,
-                    "at least one of age, gender, liveness, mask detect failed, codes are:",
-                    String.valueOf(ageCode), " , ", String.valueOf(genderCode), " , ", String.valueOf(livenessCode), " , ", String.valueOf(maskCode));
-            showNotificationAndFinish(notificationSpannableStringBuilder);
-            return;
-        }
-
-        if (ageInfoList.size() > 0) {
+        if (faceResults.size() > 0) {
             addNotificationInfo(notificationSpannableStringBuilder, new StyleSpan(Typeface.BOLD), "age of each face:\n");
         }
-        for (int i = 0; i < ageInfoList.size(); i++) {
-            addNotificationInfo(notificationSpannableStringBuilder, null, "face[", String.valueOf(i), "]:", String.valueOf(ageInfoList.get(i).getAge()), "\n");
+        for (int i = 0; i < faceResults.size(); i++) {
+            addNotificationInfo(notificationSpannableStringBuilder, null, "face[", String.valueOf(i), "]:", String.valueOf(faceResults.get(i).age), "\n");
         }
         addNotificationInfo(notificationSpannableStringBuilder, null, "\n");
 
-        if (genderInfoList.size() > 0) {
+        if (faceResults.size() > 0) {
             addNotificationInfo(notificationSpannableStringBuilder, new StyleSpan(Typeface.BOLD), "gender of each face:\n");
         }
-        for (int i = 0; i < genderInfoList.size(); i++) {
+        for (int i = 0; i < faceResults.size(); i++) {
             addNotificationInfo(notificationSpannableStringBuilder, null, "face[", String.valueOf(i), "]:"
-                    , genderInfoList.get(i).getGender() == GenderInfo.MALE ?
-                            "MALE" : (genderInfoList.get(i).getGender() == GenderInfo.FEMALE ? "FEMALE" : "UNKNOWN"), "\n");
+                    , faceResults.get(i).gender == GenderInfo.MALE ?
+                            "MALE" : (faceResults.get(i).gender == GenderInfo.FEMALE ? "FEMALE" : "UNKNOWN"), "\n");
         }
         addNotificationInfo(notificationSpannableStringBuilder, null, "\n");
 
-        if (livenessInfoList.size() > 0) {
+        if (faceResults.size() > 0) {
             addNotificationInfo(notificationSpannableStringBuilder, new StyleSpan(Typeface.BOLD), "liveness of each face:\n");
-            for (int i = 0; i < livenessInfoList.size(); i++) {
+            for (int i = 0; i < faceResults.size(); i++) {
                 String liveness = null;
-                switch (livenessInfoList.get(i).getLiveness()) {
+                switch (faceResults.get(i).liveness) {
                     case LivenessInfo.ALIVE:
                         liveness = "REAL";
                         break;
@@ -313,11 +265,10 @@ public class ImageFaceAttrDetectActivity extends BaseActivity {
         }
         addNotificationInfo(notificationSpannableStringBuilder, null, "\n");
 
-        if (!maskInfoList.isEmpty()) {
+        if (!faceResults.isEmpty()) {
             addNotificationInfo(notificationSpannableStringBuilder, new StyleSpan(Typeface.BOLD), "mask of each face:\n");
-            for (int i = 0; i < maskInfoList.size(); i++) {
-                MaskInfo maskInfo = maskInfoList.get(i);
-                int mask = maskInfo.getMask();
+            for (int i = 0; i < faceResults.size(); i++) {
+                int mask = faceResults.get(i).mask;
                 String stringMask;
                 switch (mask) {
                     case MaskInfo.NOT_WORN:

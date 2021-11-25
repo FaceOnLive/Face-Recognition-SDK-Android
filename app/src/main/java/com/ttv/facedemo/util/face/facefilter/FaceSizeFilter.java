@@ -24,11 +24,9 @@ public class FaceSizeFilter implements FaceRecognizeFilter {
                 continue;
             }
             if (facePreviewInfo.getFaceInfoRgb() != null) {
-                Rect rgbRect = facePreviewInfo.getFaceInfoRgb().getRect();
-                Rect irRect = facePreviewInfo.getFaceInfoIr() == null ? null : facePreviewInfo.getFaceInfoIr().getRect();
+                Rect rgbRect = facePreviewInfo.getFaceInfoRgb().rect;
                 boolean rgbRectValid = rgbRect == null || (rgbRect.width() > horizontalSize && rgbRect.height() > verticalSize);
-                boolean irRectValid = irRect == null || (irRect.width() > horizontalSize && irRect.height() > verticalSize);
-                facePreviewInfo.setQualityPass(rgbRectValid && irRectValid);
+                facePreviewInfo.setQualityPass(rgbRectValid);
             }
         }
     }

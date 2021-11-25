@@ -32,22 +32,6 @@ import com.ttv.facedemo.util.ErrorCodeUtil;
 import com.ttv.facedemo.util.FaceRectTransformer;
 import com.ttv.facedemo.util.camera.CameraListener;
 import com.ttv.facedemo.util.camera.DualCameraHelper;
-import com.ttv.facedemo.util.camera.glsurface.CameraGLSurfaceView;
-import com.ttv.facedemo.util.face.FaceHelper;
-import com.ttv.facedemo.util.face.IDualCameraFaceInfoTransformer;
-import com.ttv.facedemo.util.face.model.FacePreviewInfo;
-import com.ttv.facedemo.util.face.model.RecognizeConfiguration;
-import com.ttv.facedemo.widget.FaceRectView;
-import com.ttv.face.AgeInfo;
-import com.ttv.face.ErrorInfo;
-import com.ttv.face.FaceSDK;
-import com.ttv.face.FaceInfo;
-import com.ttv.face.GenderInfo;
-import com.ttv.face.LivenessInfo;
-import com.ttv.face.enums.DetectMode;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CameraConfigureActivity extends BaseActivity {
     private ActivityCameraConfigureBinding binding;

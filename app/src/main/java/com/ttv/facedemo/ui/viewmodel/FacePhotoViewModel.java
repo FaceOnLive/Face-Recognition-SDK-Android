@@ -125,8 +125,7 @@ public class FacePhotoViewModel extends ViewModel {
         })
                 .flatMap((Function<byte[], ObservableSource<FaceEntity>>) bgr24Data -> {
                     Observable<FaceEntity> faceEntityObservable = Observable.just(faceRepository.registerBgr24(
-                            TTVFaceApplication.getApplication(), bgr24Data,
-                            alignedBitmap.getWidth(), alignedBitmap.getHeight(),
+                            TTVFaceApplication.getApplication(), alignedBitmap,
                             String.valueOf(System.currentTimeMillis())));
                     loadData(true);
                     return faceEntityObservable;

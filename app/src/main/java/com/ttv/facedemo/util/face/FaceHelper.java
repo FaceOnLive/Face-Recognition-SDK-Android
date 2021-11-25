@@ -8,6 +8,8 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.ttv.face.FaceEngine;
+import com.ttv.face.FaceResult;
 import com.ttv.facedemo.facedb.FaceManager;
 import com.ttv.facedemo.ui.model.CompareResult;
 import com.ttv.facedemo.util.FaceRectTransformer;
@@ -21,14 +23,10 @@ import com.ttv.facedemo.util.face.facefilter.FaceSizeFilter;
 import com.ttv.facedemo.util.face.model.FacePreviewInfo;
 import com.ttv.facedemo.util.face.model.RecognizeConfiguration;
 import com.ttv.facedemo.util.face.model.RecognizeInfo;
-import com.ttv.face.ErrorInfo;
 import com.ttv.face.FaceSDK;
 import com.ttv.face.FaceFeature;
-import com.ttv.face.FaceInfo;
-import com.ttv.face.ImageQualitySimilar;
 import com.ttv.face.LivenessInfo;
 import com.ttv.face.MaskInfo;
-import com.ttv.face.enums.ExtractType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -62,26 +60,21 @@ public class FaceHelper implements FaceListener {
 
     private CompositeDisposable getFeatureDelayedDisposables = new CompositeDisposable();
     private CompositeDisposable delayFaceTaskCompositeDisposable = new CompositeDisposable();
-    private IDualCameraFaceInfoTransformer dualCameraFaceInfoTransformer;
 
     private static final int ERROR_BUSY = -1;
     private static final int ERROR_FR_ENGINE_IS_NULL = -2;
     private static final int ERROR_FL_ENGINE_IS_NULL = -3;
-    private FaceSDK ftEngine;
-    private FaceSDK frEngine;
-    private FaceSDK flEngine;
 
+    private FaceEngine faceEngine;
     private Camera.Size previewSize;
 
-    private List<FaceInfo> faceInfoList = new CopyOnWriteArrayList<>();
-    private List<MaskInfo> maskInfoList = new CopyOnWriteArrayList<>();
+    private List<FaceResult> faceInfoList = new CopyOnWriteArrayList<>();
     private ExecutorService frExecutor;
     private ExecutorService flExecutor;
     private LinkedBlockingQueue<Runnable> frThreadQueue;
     private LinkedBlockingQueue<Runnable> flThreadQueue;
 
     private FaceRectTransformer rgbFaceRectTransformer;
-    private FaceRectTransformer irFaceRectTransformer;
     private Rect recognizeArea = new Rect(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
     private List<FaceRecognizeFilter> faceRecognizeFilterList = new ArrayList<>();
@@ -98,14 +91,11 @@ public class FaceHelper implements FaceListener {
     private FaceHelper(Builder builder) {
         needUpdateFaceData = builder.needUpdateFaceData;
         onlyDetectLiveness = builder.onlyDetectLiveness;
-        ftEngine = builder.ftEngine;
+        faceEngine = builder.faceEngine;
         trackedFaceCount = builder.trackedFaceCount;
         previewSize = builder.previewSize;
-        frEngine = builder.frEngine;
-        flEngine = builder.flEngine;
         recognizeCallback = builder.recognizeCallback;
         recognizeConfiguration = builder.recognizeConfiguration;
-        dualCameraFaceInfoTransformer = builder.dualCameraFaceInfoTransformer;
 
         int frQueueSize = recognizeConfiguration.getMaxDetectFaces();
         if (builder.frQueueSize > 0) {
@@ -147,7 +137,7 @@ public class FaceHelper implements FaceListener {
     }
 
     public void requestFaceFeature(byte[] nv21, FacePreviewInfo facePreviewInfo, int width, int height, int format) {
-        if (frEngine != null && frThreadQueue.remainingCapacity() > 0) {
+        if (faceEngine != null && frThreadQueue.remainingCapacity() > 0) {
             frExecutor.execute(new FaceRecognizeRunnable(nv21, facePreviewInfo, width, height, format));
         } else {
             onFaceFeatureInfoGet(null, facePreviewInfo.getTrackId(), ERROR_BUSY);
@@ -155,10 +145,10 @@ public class FaceHelper implements FaceListener {
     }
 
     public void requestFaceLiveness(byte[] nv21, FacePreviewInfo faceInfo, int width, int height, int format, LivenessType livenessType, Object waitLock) {
-        if (flEngine != null && flThreadQueue.remainingCapacity() > 0) {
+        if (faceEngine != null && flThreadQueue.remainingCapacity() > 0) {
             flExecutor.execute(new FaceLivenessDetectRunnable(nv21, faceInfo, width, height, format, livenessType, waitLock));
         } else {
-            onFaceLivenessInfoGet(null, faceInfo.getTrackId(), ERROR_BUSY);
+            onFaceLivenessInfoGet(-1000, faceInfo.getTrackId(), ERROR_BUSY);
         }
 
     }
@@ -190,15 +180,10 @@ public class FaceHelper implements FaceListener {
     }
 
     public List<FacePreviewInfo> onPreviewFrame(@NonNull byte[] rgbNv21, @Nullable byte[] irNv21, boolean doRecognize) {
-        if (ftEngine != null) {
+        if (faceEngine != null) {
             faceInfoList.clear();
-            maskInfoList.clear();
             facePreviewInfoList.clear();
-            int code = ftEngine.detectFaces(rgbNv21, previewSize.width, previewSize.height, FaceSDK.CP_PAF_NV21, faceInfoList);
-            if (code != ErrorInfo.MOK) {
-                onFail(new Exception("detectFaces failed,code is " + code));
-                return facePreviewInfoList;
-            }
+            faceInfoList = faceEngine.detectFaceWithVideo(rgbNv21, previewSize.width, previewSize.height);
             if (recognizeConfiguration.isKeepMaxFace()) {
                 keepMaxFace(faceInfoList);
             }
@@ -207,39 +192,15 @@ public class FaceHelper implements FaceListener {
                 return facePreviewInfoList;
             }
             if (!onlyDetectLiveness) {
-                code = ftEngine.process(rgbNv21, previewSize.width, previewSize.height, FaceSDK.CP_PAF_NV21, faceInfoList,
-                        FaceSDK.TTV_MASK_DETECT);
-                if (code == ErrorInfo.MOK) {
-                    code = ftEngine.getMask(maskInfoList);
-                    if (code != ErrorInfo.MOK) {
-                        onFail(new Exception("process getMask failed,code is " + code));
-                        return facePreviewInfoList;
-                    }
-                } else {
-                    onFail(new Exception("process mask failed,code is " + code));
-                    return facePreviewInfoList;
-                }
+                faceEngine.maskProcess(rgbNv21, previewSize.width, previewSize.height, faceInfoList);
             }
 
             for (int i = 0; i < faceInfoList.size(); i++) {
                 FacePreviewInfo facePreviewInfo = new FacePreviewInfo(faceInfoList.get(i), currentTrackIdList.get(i));
-                if (!maskInfoList.isEmpty()) {
-                    MaskInfo maskInfo = maskInfoList.get(i);
-                    facePreviewInfo.setMask(maskInfo.getMask());
-                }
+                facePreviewInfo.setMask(faceInfoList.get(i).mask);
                 if (rgbFaceRectTransformer != null && recognizeArea != null) {
-                    Rect rect = rgbFaceRectTransformer.adjustRect(faceInfoList.get(i).getRect());
-                    Rect foreRect = rgbFaceRectTransformer.adjustRect(faceInfoList.get(i).getForeheadRect());
+                    Rect rect = rgbFaceRectTransformer.adjustRect(faceInfoList.get(i).rect);
                     facePreviewInfo.setRgbTransformedRect(rect);
-                    facePreviewInfo.setForeRect(foreRect);
-                }
-                if (irFaceRectTransformer != null) {
-                    FaceInfo faceInfo = faceInfoList.get(i);
-                    if (dualCameraFaceInfoTransformer != null) {
-                        faceInfo = dualCameraFaceInfoTransformer.transformFaceInfo(faceInfo);
-                    }
-                    facePreviewInfo.setFaceInfoIr(faceInfo);
-                    facePreviewInfo.setIrTransformedRect(irFaceRectTransformer.adjustRect(faceInfo.getRect()));
                 }
                 facePreviewInfoList.add(facePreviewInfo);
             }
@@ -255,10 +216,6 @@ public class FaceHelper implements FaceListener {
 
     public void setRgbFaceRectTransformer(FaceRectTransformer rgbFaceRectTransformer) {
         this.rgbFaceRectTransformer = rgbFaceRectTransformer;
-    }
-
-    public void setIrFaceRectTransformer(FaceRectTransformer irFaceRectTransformer) {
-        this.irFaceRectTransformer = irFaceRectTransformer;
     }
 
     private void clearLeftFace(List<FacePreviewInfo> facePreviewInfoList) {
@@ -296,9 +253,6 @@ public class FaceHelper implements FaceListener {
             }
             for (int i = 0; i < facePreviewInfoList.size(); i++) {
                 FacePreviewInfo facePreviewInfo = facePreviewInfoList.get(i);
-                if (!facePreviewInfo.isQualityPass()) {
-                    continue;
-                }
                 if (!onlyDetectLiveness && facePreviewInfo.getMask() == MaskInfo.UNKNOWN) {
                     continue;
                 }
@@ -453,9 +407,9 @@ public class FaceHelper implements FaceListener {
     }
 
     @Override
-    public void onFaceLivenessInfoGet(@Nullable LivenessInfo livenessInfo, Integer trackId, Integer errorCode) {
-        if (livenessInfo != null) {
-            int liveness = livenessInfo.getLiveness();
+    public void onFaceLivenessInfoGet(int liveness, Integer trackId, Integer errorCode) {
+        if(liveness != -1000)
+        {
             Log.i(TAG, "onFaceLivenessInfoGet liveness:" + liveness);
             changeLiveness(trackId, liveness);
             // 非活体，重试
@@ -463,7 +417,9 @@ public class FaceHelper implements FaceListener {
                 noticeCurrentStatus("Liveness failed.");
                 retryLivenessDetectDelayed(trackId);
             }
-        } else {
+        }
+        else
+        {
             RecognizeInfo recognizeInfo = getRecognizeInfo(recognizeInfoMap, trackId);
             if (recognizeInfo.increaseAndGetLivenessErrorRetryCount() > recognizeConfiguration.getLivenessRetryCount()) {
                 recognizeInfo.setLivenessErrorRetryCount(0);
@@ -491,7 +447,7 @@ public class FaceHelper implements FaceListener {
     }
 
     private void searchFace(final FaceFeature faceFeature, final Integer trackId) {
-        CompareResult compareResult = FaceManager.getInstance().searchFaceFeature(faceFeature, frEngine);
+        CompareResult compareResult = FaceManager.getInstance().searchFaceFeature(faceFeature, faceEngine);
         if (compareResult == null || compareResult.getFaceEntity() == null) {
             retryRecognizeDelayed(trackId);
             return;
@@ -510,7 +466,7 @@ public class FaceHelper implements FaceListener {
     }
 
     public class FaceRecognizeRunnable implements Runnable {
-        private FaceInfo faceInfo;
+        private FaceResult faceInfo;
         private int width;
         private int height;
         private int format;
@@ -523,7 +479,7 @@ public class FaceHelper implements FaceListener {
                 return;
             }
             this.nv21Data = nv21Data;
-            this.faceInfo = new FaceInfo(facePreviewInfo.getFaceInfoRgb());
+            this.faceInfo = facePreviewInfo.getFaceInfoRgb();
             this.width = width;
             this.height = height;
             this.format = format;
@@ -534,31 +490,8 @@ public class FaceHelper implements FaceListener {
         @Override
         public void run() {
             if (nv21Data != null) {
-                if (frEngine != null) {
-                    if (recognizeConfiguration.isEnableImageQuality()) {
-
-                        ImageQualitySimilar qualitySimilar = new ImageQualitySimilar();
-                        int iqCode;
-                        long iqStartTime = System.currentTimeMillis();
-                        synchronized (frEngine) {
-                            iqCode = frEngine.imageQualityDetect(nv21Data, width, height, format, faceInfo, isMask, qualitySimilar);
-                        }
-                        Log.i(TAG, "fr iqTime:" + (System.currentTimeMillis() - iqStartTime) + "ms");
-                        if (iqCode == ErrorInfo.MOK) {
-                            float quality = qualitySimilar.getScore();
-                            float destQuality = isMask == MaskInfo.WORN ? recognizeConfiguration.getImageQualityMaskRecognizeThreshold() :
-                                    recognizeConfiguration.getImageQualityNoMaskRecognizeThreshold();
-                            if (quality >= destQuality) {
-                                extractFace();
-                            } else {
-                                onFaceFail(iqCode, "fr imageQualityDetect score invalid");
-                            }
-                        } else {
-                            onFaceFail(iqCode, "fr imageQuality failed errorCode is " + iqCode);
-                        }
-                    } else {
-                        extractFace();
-                    }
+                if (faceEngine != null) {
+                    extractFace();
                 } else {
                     onFaceFail(ERROR_FR_ENGINE_IS_NULL, "fr failed ,frEngine is null");
                 }
@@ -570,16 +503,13 @@ public class FaceHelper implements FaceListener {
             long irStartTime = System.currentTimeMillis();
             FaceFeature faceFeature = new FaceFeature();
             int frCode;
-            synchronized (frEngine) {
 
-                frCode = frEngine.extractFaceFeature(nv21Data, width, height, format, faceInfo, ExtractType.RECOGNIZE, isMask, faceFeature);
-            }
+            List<FaceResult> faceResults = new ArrayList<FaceResult>();
+            faceResults.add(faceInfo);
+
+            frCode = faceEngine.extractFeature(nv21Data, width, height, false, faceResults);
             Log.i(TAG, "frTime:" + (System.currentTimeMillis() - irStartTime) + "ms");
-            if (frCode == ErrorInfo.MOK) {
-                onFaceFeatureInfoGet(faceFeature, trackId, frCode);
-            } else {
-                onFaceFail(frCode, "fr failed errorCode is " + frCode);
-            }
+            onFaceFeatureInfoGet(new FaceFeature(faceResults.get(0).feature), trackId, frCode);
         }
 
         private void onFaceFail(int code, String errorMsg) {
@@ -589,7 +519,7 @@ public class FaceHelper implements FaceListener {
     }
 
     public class FaceLivenessDetectRunnable implements Runnable {
-        private FaceInfo faceInfo;
+        private FaceResult faceInfo;
         private int width;
         private int height;
         private int format;
@@ -603,7 +533,7 @@ public class FaceHelper implements FaceListener {
                 return;
             }
             this.nv21Data = nv21Data;
-            this.faceInfo = new FaceInfo(faceInfo.getFaceInfoRgb());
+            this.faceInfo = faceInfo.getFaceInfoRgb();
             this.width = width;
             this.height = height;
             this.format = format;
@@ -615,7 +545,7 @@ public class FaceHelper implements FaceListener {
         @Override
         public void run() {
             if (nv21Data != null) {
-                if (flEngine != null) {
+                if (faceEngine != null) {
                     processLiveness();
                 } else {
                     onProcessFail(ERROR_FL_ENGINE_IS_NULL, "fl failed ,frEngine is null");
@@ -625,83 +555,31 @@ public class FaceHelper implements FaceListener {
         }
 
         private void processLiveness() {
-            List<LivenessInfo> livenessInfoList = new ArrayList<>();
-            int flCode = -1;
-            synchronized (flEngine) {
-                long flStartTime = System.currentTimeMillis();
-                if (livenessType == LivenessType.RGB) {
+            List<FaceResult> faceResults = new ArrayList<>();
+            faceResults.add(faceInfo);
 
-                    flCode = flEngine.process(nv21Data, width, height, format, Arrays.asList(faceInfo), FaceSDK.TTV_LIVENESS);
-                } else {
-                    if (dualCameraFaceInfoTransformer != null) {
-                        faceInfo = dualCameraFaceInfoTransformer.transformFaceInfo(faceInfo);
-                    }
-                    List<FaceInfo> faceInfoList = new ArrayList<>();
-                    int fdCode = flEngine.detectFaces(nv21Data, width, height, format, faceInfoList);
-                    boolean isFaceExists = isFaceExists(faceInfoList, faceInfo);
-                    if (fdCode == ErrorInfo.MOK && isFaceExists) {
-                        if (needUpdateFaceData) {
-
-                            flCode = flEngine.updateFaceData(nv21Data, previewSize.width, previewSize.height, FaceSDK.CP_PAF_NV21,
-                                    new ArrayList<>(Collections.singletonList(faceInfo)));
-                            if (flCode == ErrorInfo.MOK) {
-                                flCode = flEngine.processIr(nv21Data, width, height, format, Arrays.asList(faceInfo), FaceSDK.TTV_IR_LIVENESS);
-                            }
-                        } else {
-                            flCode = flEngine.processIr(nv21Data, width, height, format, Arrays.asList(faceInfo), FaceSDK.TTV_IR_LIVENESS);
-                        }
-                    } else {
-                        onFail(new Exception("ir detectFaces failed fdCode:" + fdCode + ",isFaceExists:" + isFaceExists));
-                    }
+            faceEngine.livenessProcess(nv21Data, width, height, faceResults);
+            onFaceLivenessInfoGet(faceResults.get(0).liveness, trackId, 0);
+            if (faceResults.get(0).liveness == LivenessInfo.ALIVE) {
+                synchronized (waitLock) {
+                    waitLock.notifyAll();
                 }
-                Log.i(TAG, "flTime:" + (System.currentTimeMillis() - flStartTime) + "ms");
-            }
-            if (flCode == ErrorInfo.MOK) {
-                if (livenessType == LivenessType.RGB) {
-                    flCode = flEngine.getLiveness(livenessInfoList);
-                } else {
-                    flCode = flEngine.getIrLiveness(livenessInfoList);
-                }
-            }
-
-            if (flCode == ErrorInfo.MOK && !livenessInfoList.isEmpty()) {
-                onFaceLivenessInfoGet(livenessInfoList.get(0), trackId, flCode);
-                if (livenessInfoList.get(0).getLiveness() == LivenessInfo.ALIVE) {
-                    synchronized (waitLock) {
-                        waitLock.notifyAll();
-                    }
-                }
-            } else {
-                onProcessFail(flCode, "fl failed errorCode is " + flCode);
             }
         }
 
         private void onProcessFail(int code, String msg) {
-            onFaceLivenessInfoGet(null, trackId, code);
+            onFaceLivenessInfoGet(-1000, trackId, code);
             onFail(new Exception(msg));
         }
     }
 
-    public static boolean isFaceExists(List<FaceInfo> faceInfoList, FaceInfo faceInfo) {
-        if (faceInfoList == null || faceInfoList.isEmpty() || faceInfo == null) {
-            return false;
-        }
-        for (FaceInfo info : faceInfoList) {
-            if (Rect.intersects(faceInfo.getRect(), info.getRect())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    private void refreshTrackId(List<FaceInfo> ftFaceList) {
+    private void refreshTrackId(List<FaceResult> ftFaceList) {
         currentTrackIdList.clear();
-        for (FaceInfo faceInfo : ftFaceList) {
-            currentTrackIdList.add(faceInfo.getFaceId() + trackedFaceCount);
+        for (FaceResult faceInfo : ftFaceList) {
+            currentTrackIdList.add(faceInfo.faceId + trackedFaceCount);
         }
         if (!ftFaceList.isEmpty()) {
-            currentMaxFaceId = ftFaceList.get(ftFaceList.size() - 1).getFaceId();
+            currentMaxFaceId = ftFaceList.get(ftFaceList.size() - 1).faceId;
         }
     }
     public int getTrackedFaceCount() {
@@ -715,11 +593,6 @@ public class FaceHelper implements FaceListener {
             recognizeInfo.setName(name);
         }
     }
-
-    public void setDualCameraFaceInfoTransformer(IDualCameraFaceInfoTransformer transformer) {
-        this.dualCameraFaceInfoTransformer = transformer;
-    }
-
 
     public String getName(int trackId) {
         RecognizeInfo recognizeInfo = recognizeInfoMap.get(trackId);
@@ -772,13 +645,13 @@ public class FaceHelper implements FaceListener {
         return getRecognizeInfo(recognizeInfoMap, trackId).getRecognizeStatus();
     }
 
-    private static void keepMaxFace(List<FaceInfo> ftFaceList) {
+    private static void keepMaxFace(List<FaceResult> ftFaceList) {
         if (ftFaceList == null || ftFaceList.size() <= 1) {
             return;
         }
-        FaceInfo maxFaceInfo = ftFaceList.get(0);
-        for (FaceInfo faceInfo : ftFaceList) {
-            if (faceInfo.getRect().width() > maxFaceInfo.getRect().width()) {
+        FaceResult maxFaceInfo = ftFaceList.get(0);
+        for (FaceResult faceInfo : ftFaceList) {
+            if (faceInfo.rect.width() > maxFaceInfo.rect.width()) {
                 maxFaceInfo = faceInfo;
             }
         }
@@ -788,15 +661,12 @@ public class FaceHelper implements FaceListener {
 
 
     public static final class Builder {
-        private FaceSDK ftEngine;
-        private FaceSDK frEngine;
-        private FaceSDK flEngine;
+        private FaceEngine faceEngine;
         private Camera.Size previewSize;
         private boolean onlyDetectLiveness;
         private boolean needUpdateFaceData;
         private RecognizeConfiguration recognizeConfiguration;
         private RecognizeCallback recognizeCallback;
-        private IDualCameraFaceInfoTransformer dualCameraFaceInfoTransformer;
         private int frQueueSize;
         private int flQueueSize;
         private int trackedFaceCount;
@@ -809,28 +679,13 @@ public class FaceHelper implements FaceListener {
             return this;
         }
 
-        public Builder dualCameraFaceInfoTransformer(IDualCameraFaceInfoTransformer val) {
-            dualCameraFaceInfoTransformer = val;
-            return this;
-        }
-
         public Builder recognizeCallback(RecognizeCallback val) {
             recognizeCallback = val;
             return this;
         }
 
-        public Builder ftEngine(FaceSDK val) {
-            ftEngine = val;
-            return this;
-        }
-
-        public Builder frEngine(FaceSDK val) {
-            frEngine = val;
-            return this;
-        }
-
-        public Builder flEngine(FaceSDK val) {
-            flEngine = val;
+        public Builder faceEngine(FaceEngine val) {
+            faceEngine = val;
             return this;
         }
 

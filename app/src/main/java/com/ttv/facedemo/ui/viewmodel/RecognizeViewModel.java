@@ -10,6 +10,11 @@ import android.widget.Toast;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.ttv.face.AgeInfo;
+import com.ttv.face.FaceEngine;
+import com.ttv.face.GenderInfo;
+import com.ttv.face.LivenessInfo;
+import com.ttv.face.MaskInfo;
 import com.ttv.facedemo.TTVFaceApplication;
 import com.ttv.facedemo.R;
 import com.ttv.facedemo.ui.model.CompareResult;
@@ -26,17 +31,6 @@ import com.ttv.facedemo.util.face.constants.RecognizeColor;
 import com.ttv.facedemo.util.face.model.RecognizeConfiguration;
 import com.ttv.facedemo.util.face.constants.RequestFeatureStatus;
 import com.ttv.facedemo.widget.FaceRectView;
-import com.ttv.face.AgeInfo;
-import com.ttv.face.ErrorInfo;
-import com.ttv.face.FaceAttributeParam;
-import com.ttv.face.FaceSDK;
-import com.ttv.face.FaceInfo;
-import com.ttv.face.GenderInfo;
-import com.ttv.face.LivenessInfo;
-import com.ttv.face.LivenessParam;
-import com.ttv.face.MaskInfo;
-import com.ttv.face.enums.DetectFaceOrientPriority;
-import com.ttv.face.enums.DetectMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,17 +99,9 @@ public class RecognizeViewModel extends ViewModel implements RecognizeCallback {
 
     private MutableLiveData<FaceItemEvent> faceItemEventMutableLiveData = new MutableLiveData<>();
 
-    private MutableLiveData<Integer> ftInitCode = new MutableLiveData<>();
-    private MutableLiveData<Integer> frInitCode = new MutableLiveData<>();
-    private MutableLiveData<Integer> flInitCode = new MutableLiveData<>();
-
     private FaceHelper faceHelper;
 
-    private FaceSDK ftEngine;
-
-    private FaceSDK frEngine;
-
-    private FaceSDK flEngine;
+    private FaceEngine faceEngine;
 
     private PreviewConfig previewConfig;
 
@@ -147,24 +133,12 @@ public class RecognizeViewModel extends ViewModel implements RecognizeCallback {
         faceHelper.setRgbFaceRectTransformer(rgbFaceRectTransformer);
     }
 
-    public void setIrFaceRectTransformer(FaceRectTransformer irFaceRectTransformer) {
-        faceHelper.setIrFaceRectTransformer(irFaceRectTransformer);
-    }
-
     private void registerFace(final byte[] nv21, FacePreviewInfo facePreviewInfo) {
         updateRegisterStatus(REGISTER_STATUS_PROCESSING);
         registerNv21Disposable = Observable.create((ObservableOnSubscribe<Boolean>) emitter -> {
-            FaceSDK registerEngine = new FaceSDK(TTVFaceApplication.getApplication());
-            int res = registerEngine.init(TTVFaceApplication.getApplication(), DetectMode.TTV_DETECT_MODE_IMAGE, DetectFaceOrientPriority.TTV_OP_0_ONLY,
-                    1, FaceSDK.TTV_FACE_RECOGNITION);
-            if (res == ErrorInfo.MOK) {
-                boolean success = FaceManager.getInstance().registerNv21(TTVFaceApplication.getApplication(), nv21.clone(), previewSize.width,
-                        previewSize.height, facePreviewInfo, "registered_" + faceHelper.getTrackedFaceCount(), frEngine, registerEngine);
-                registerEngine.unInit();
-                emitter.onNext(success);
-            } else {
-                emitter.onNext(false);
-            }
+            boolean success = FaceManager.getInstance().registerNv21(TTVFaceApplication.getApplication(), nv21.clone(), previewSize.width,
+                    previewSize.height, facePreviewInfo, "registered_" + faceHelper.getTrackedFaceCount(), faceEngine, faceEngine);
+            emitter.onNext(success);
             emitter.onComplete();
         })
                 .subscribeOn(Schedulers.computation())
@@ -229,65 +203,19 @@ public class RecognizeViewModel extends ViewModel implements RecognizeCallback {
                 .similarThreshold(ConfigUtil.getRecognizeThreshold(context))
                 .imageQualityNoMaskRecognizeThreshold(ConfigUtil.getImageQualityNoMaskRecognizeThreshold(context))
                 .imageQualityMaskRecognizeThreshold(ConfigUtil.getImageQualityMaskRecognizeThreshold(context))
-                .livenessParam(new LivenessParam(ConfigUtil.getRgbLivenessThreshold(context), ConfigUtil.getIrLivenessThreshold(context),
-                        ConfigUtil.getLivenessFqThreshold(context)))
                 .build();
         int cameraOffsetX = ConfigUtil.getDualCameraHorizontalOffset(context);
         int cameraOffsetY = ConfigUtil.getDualCameraVerticalOffset(context);
         needUpdateFaceData = (livenessType == LivenessType.IR && (cameraOffsetX != 0 || cameraOffsetY != 0));
 
-        ftEngine = new FaceSDK(context);
-        int ftEngineMask = FaceSDK.TTV_FACE_DETECT | FaceSDK.TTV_MASK_DETECT;
-        ftInitCode.postValue(ftEngine.init(context, DetectMode.TTV_DETECT_MODE_VIDEO, ConfigUtil.getFtOrient(context),
-                ConfigUtil.getRecognizeMaxDetectFaceNum(context), ftEngineMask));
-        FaceAttributeParam attributeParam = new FaceAttributeParam(
-                ConfigUtil.getRecognizeEyeOpenThreshold(context), ConfigUtil.getRecognizeMouthCloseThreshold(context),
-                ConfigUtil.getRecognizeWearGlassesThreshold(context));
-        ftEngine.setFaceAttributeParam(attributeParam);
-
-        frEngine = new FaceSDK(context);
-        int frEngineMask = FaceSDK.TTV_FACE_RECOGNITION;
-        if (enableFaceQualityDetect) {
-            frEngineMask |= FaceSDK.TTV_IMAGEQUALITY;
-        }
-        frInitCode.postValue(frEngine.init(context, DetectMode.TTV_DETECT_MODE_IMAGE, DetectFaceOrientPriority.TTV_OP_0_ONLY,
-                10, frEngineMask));
-        FaceManager.getInstance().initFaceList(context, frEngine, faceCount -> loadFaceList = true, true);
-
-        if (enableLive) {
-            flEngine = new FaceSDK(context);
-            int flEngineMask = (livenessType == LivenessType.RGB ? FaceSDK.TTV_LIVENESS : (FaceSDK.TTV_IR_LIVENESS | FaceSDK.TTV_FACE_DETECT));
-            if (needUpdateFaceData) {
-                flEngineMask |= FaceSDK.TTV_UPDATE_FACEDATA;
-            }
-            flInitCode.postValue(flEngine.init(context, DetectMode.TTV_DETECT_MODE_IMAGE,
-                    DetectFaceOrientPriority.TTV_OP_ALL_OUT, 10, flEngineMask));
-            LivenessParam livenessParam = new LivenessParam(ConfigUtil.getRgbLivenessThreshold(context), ConfigUtil.getIrLivenessThreshold(context), ConfigUtil.getLivenessFqThreshold(context));
-            flEngine.setLivenessParam(livenessParam);
-        }
+        faceEngine = FaceEngine.getInstance(context);
+        FaceManager.getInstance().initFaceList(context, faceEngine, faceCount -> loadFaceList = true, true);
 
         recognizeConfiguration.setValue(configuration);
     }
 
     private void unInit() {
-        if (ftEngine != null) {
-            synchronized (ftEngine) {
-                int ftUnInitCode = ftEngine.unInit();
-                Log.i(TAG, "unInitEngine: " + ftUnInitCode);
-            }
-        }
-        if (frEngine != null) {
-            synchronized (frEngine) {
-                int frUnInitCode = frEngine.unInit();
-                Log.i(TAG, "unInitEngine: " + frUnInitCode);
-            }
-        }
-        if (flEngine != null) {
-            synchronized (flEngine) {
-                int flUnInitCode = flEngine.unInit();
-                Log.i(TAG, "unInitEngine: " + flUnInitCode);
-            }
-        }
+
     }
 
     public void clearLeftFace(List<FacePreviewInfo> facePreviewInfoList) {
@@ -351,9 +279,7 @@ public class RecognizeViewModel extends ViewModel implements RecognizeCallback {
             int verticalOffset = ConfigUtil.getDualCameraVerticalOffset(context);
             int maxDetectFaceNum = ConfigUtil.getRecognizeMaxDetectFaceNum(context);
             faceHelper = new FaceHelper.Builder()
-                    .ftEngine(ftEngine)
-                    .frEngine(frEngine)
-                    .flEngine(flEngine)
+                    .faceEngine(FaceEngine.getInstance(context))
                     .needUpdateFaceData(needUpdateFaceData)
                     .frQueueSize(maxDetectFaceNum)
                     .flQueueSize(maxDetectFaceNum)
@@ -361,11 +287,6 @@ public class RecognizeViewModel extends ViewModel implements RecognizeCallback {
                     .recognizeCallback(this)
                     .recognizeConfiguration(recognizeConfiguration.getValue())
                     .trackedFaceCount(trackedFaceCount == null ? ConfigUtil.getTrackedFaceCount(context) : trackedFaceCount)
-                    .dualCameraFaceInfoTransformer(faceInfo -> {
-                        FaceInfo irFaceInfo = new FaceInfo(faceInfo);
-                        irFaceInfo.getRect().offset(horizontalOffset, verticalOffset);
-                        return irFaceInfo;
-                    })
                     .build();
         }
     }
@@ -416,18 +337,6 @@ public class RecognizeViewModel extends ViewModel implements RecognizeCallback {
         this.onRegisterFinishedCallback = onRegisterFinishedCallback;
     }
 
-    public MutableLiveData<Integer> getFtInitCode() {
-        return ftInitCode;
-    }
-
-    public MutableLiveData<Integer> getFrInitCode() {
-        return frInitCode;
-    }
-
-    public MutableLiveData<Integer> getFlInitCode() {
-        return flInitCode;
-    }
-
     public MutableLiveData<String> getRecognizeNotice() {
         return recognizeNotice;
     }
@@ -476,8 +385,8 @@ public class RecognizeViewModel extends ViewModel implements RecognizeCallback {
             drawInfoList.add(new FaceRectView.DrawInfo(
                     livenessType == LivenessType.RGB ? facePreviewInfoList.get(i).getRgbTransformedRect() : facePreviewInfoList.get(i).getIrTransformedRect(),
                     GenderInfo.UNKNOWN, AgeInfo.UNKNOWN_AGE, liveness == null ? LivenessInfo.UNKNOWN : liveness, color,
-                    name == null ? "" : name, facePreviewInfoList.get(i).getFaceInfoRgb().getIsWithinBoundary(),
-                    facePreviewInfoList.get(i).getForeRect(), facePreviewInfoList.get(i).getFaceInfoRgb().getFaceAttributeInfo(), drawRectInfo,
+                    name == null ? "" : name, 0,
+                    null, true, drawRectInfo,
                     livenessType == LivenessType.RGB, mask));
         }
         return drawInfoList;

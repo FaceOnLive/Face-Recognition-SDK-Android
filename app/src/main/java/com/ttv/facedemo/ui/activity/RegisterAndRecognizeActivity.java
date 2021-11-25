@@ -103,31 +103,6 @@ public class RegisterAndRecognizeActivity extends BaseActivity implements ViewTr
                 .get(RecognizeViewModel.class);
 
         recognizeViewModel.setLiveType(livenessType);
-
-        recognizeViewModel.getFtInitCode().observe(this, ftInitCode -> {
-            if (ftInitCode != ErrorInfo.MOK) {
-                String error = getString(R.string.specific_engine_init_failed, "ftEngine",
-                        ftInitCode, ErrorCodeUtil.ttvErrorCodeToFieldName(ftInitCode));
-                Log.i(TAG, "initEngine: " + error);
-                showToast(error);
-            }
-        });
-        recognizeViewModel.getFrInitCode().observe(this, frInitCode -> {
-            if (frInitCode != ErrorInfo.MOK) {
-                String error = getString(R.string.specific_engine_init_failed, "frEngine",
-                        frInitCode, ErrorCodeUtil.ttvErrorCodeToFieldName(frInitCode));
-                Log.i(TAG, "initEngine: " + error);
-                showToast(error);
-            }
-        });
-        recognizeViewModel.getFlInitCode().observe(this, flInitCode -> {
-            if (flInitCode != ErrorInfo.MOK) {
-                String error = getString(R.string.specific_engine_init_failed, "flEngine",
-                        flInitCode, ErrorCodeUtil.ttvErrorCodeToFieldName(flInitCode));
-                Log.i(TAG, "initEngine: " + error);
-                showToast(error);
-            }
-        });
         recognizeViewModel.getFaceItemEventMutableLiveData().observe(this, faceItemEvent -> {
             RecyclerView.Adapter adapter = binding.dualCameraRecyclerViewPerson.getAdapter();
             switch (faceItemEvent.getEventType()) {
@@ -318,84 +293,6 @@ public class RegisterAndRecognizeActivity extends BaseActivity implements ViewTr
         rgbCameraHelper.start();
     }
 
-    private void initIrCamera() {
-        if (livenessType == LivenessType.RGB || !enableLivenessDetect) {
-            return;
-        }
-        CameraListener irCameraListener = new CameraListener() {
-            @Override
-            public void onCameraOpened(Camera camera, int cameraId, int displayOrientation, boolean isMirror) {
-                Camera.Size previewSizeIr = camera.getParameters().getPreviewSize();
-                ViewGroup.LayoutParams layoutParams = adjustPreviewViewSize(binding.dualCameraTexturePreviewRgb,
-                        binding.dualCameraTexturePreviewIr, binding.dualCameraFaceRectViewIr,
-                        previewSizeIr, displayOrientation, 0.25f);
-
-                irFaceRectTransformer = new FaceRectTransformer(previewSizeIr.width, previewSizeIr.height,
-                        layoutParams.width, layoutParams.height, displayOrientation, cameraId, isMirror,
-                        ConfigUtil.isDrawIrRectHorizontalMirror(RegisterAndRecognizeActivity.this),
-                        ConfigUtil.isDrawIrRectVerticalMirror(RegisterAndRecognizeActivity.this));
-
-                FrameLayout parentView = ((FrameLayout) binding.dualCameraTexturePreviewIr.getParent());
-                if (textViewIr == null) {
-                    textViewIr = new TextView(RegisterAndRecognizeActivity.this, null);
-                } else {
-                    parentView.removeView(textViewIr);
-                }
-                textViewIr.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                textViewIr.setText(getString(R.string.camera_ir_preview_size, previewSizeIr.width, previewSizeIr.height));
-                textViewIr.setTextColor(Color.WHITE);
-                textViewIr.setBackgroundColor(getResources().getColor(R.color.color_bg_notification));
-                parentView.addView(textViewIr);
-
-                recognizeViewModel.onIrCameraOpened(camera);
-                recognizeViewModel.setIrFaceRectTransformer(irFaceRectTransformer);
-            }
-
-
-            @Override
-            public void onPreview(final byte[] nv21, Camera camera) {
-                recognizeViewModel.refreshIrPreviewData(nv21);
-            }
-
-            @Override
-            public void onCameraClosed() {
-                Log.i(TAG, "onCameraClosed: ");
-            }
-
-            @Override
-            public void onCameraError(Exception e) {
-                Log.i(TAG, "onCameraError: " + e.getMessage());
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onCameraConfigurationChanged(int cameraID, int displayOrientation) {
-                if (irFaceRectTransformer != null) {
-                    irFaceRectTransformer.setCameraDisplayOrientation(displayOrientation);
-                }
-                Log.i(TAG, "onCameraConfigurationChanged: " + cameraID + "  " + displayOrientation);
-            }
-        };
-
-        PreviewConfig previewConfig = recognizeViewModel.getPreviewConfig();
-        irCameraHelper = new DualCameraHelper.Builder()
-                .previewViewSize(new Point(binding.dualCameraTexturePreviewIr.getMeasuredWidth(), binding.dualCameraTexturePreviewIr.getMeasuredHeight()))
-                .rotation(getWindowManager().getDefaultDisplay().getRotation())
-                .specificCameraId(previewConfig.getIrCameraId())
-                .previewOn(binding.dualCameraTexturePreviewIr)
-                .cameraListener(irCameraListener)
-                .isMirror(ConfigUtil.isDrawIrPreviewHorizontalMirror(this))
-                .previewSize(recognizeViewModel.loadPreviewSize())
-                .additionalRotation(previewConfig.getIrAdditionalDisplayOrientation())
-                .build();
-        irCameraHelper.init();
-        try {
-            irCameraHelper.start();
-        } catch (RuntimeException e) {
-            showToast(e.getMessage() + getString(R.string.camera_error_notice));
-        }
-    }
-
     private void drawPreviewInfo(List<FacePreviewInfo> facePreviewInfoList) {
         if (rgbFaceRectTransformer != null) {
             List<FaceRectView.DrawInfo> rgbDrawInfoList = recognizeViewModel.getDrawInfo(facePreviewInfoList, LivenessType.RGB, openRectInfoDraw);
@@ -413,9 +310,6 @@ public class RegisterAndRecognizeActivity extends BaseActivity implements ViewTr
             if (isAllGranted) {
                 recognizeViewModel.init();
                 initRgbCamera();
-                if (DualCameraHelper.hasDualCamera() && livenessType == LivenessType.IR) {
-                    initIrCamera();
-                }
             } else {
                 showToast(getString(R.string.permission_denied));
             }
@@ -445,9 +339,6 @@ public class RegisterAndRecognizeActivity extends BaseActivity implements ViewTr
         } else {
             recognizeViewModel.init();
             initRgbCamera();
-            if (DualCameraHelper.hasDualCamera() && livenessType == LivenessType.IR) {
-                initIrCamera();
-            }
         }
     }
 

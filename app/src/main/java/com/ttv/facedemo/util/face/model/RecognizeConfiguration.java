@@ -170,10 +170,6 @@ public class RecognizeConfiguration {
         return enableFaceAreaLimit;
     }
 
-    public LivenessParam getLivenessParam() {
-        return livenessParam;
-    }
-
     public int getExtractRetryCount() {
         return extractRetryCount;
     }
@@ -238,8 +234,7 @@ public class RecognizeConfiguration {
                         "imageQualityMaskRecognizeThreshold: " + imageQualityMaskRecognizeThreshold + "\r\n" +
 
                         "enableLiveness: " + enableLiveness + "\r\n" +
-                        "livenessRetryCount: " + livenessRetryCount + "\r\n" +
-                        "livenessParams: " + (livenessParam == null ? null : (livenessParam.getRgbThreshold() + "," + livenessParam.getIrThreshold()));
+                        "livenessRetryCount: " + livenessRetryCount + "\r\n";
 
     }
 }

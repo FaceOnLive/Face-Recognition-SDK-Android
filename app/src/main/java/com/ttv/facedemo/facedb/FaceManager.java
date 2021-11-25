@@ -7,6 +7,8 @@ import android.graphics.Rect;
 import android.os.Environment;
 import android.util.Log;
 
+import com.ttv.face.FaceEngine;
+import com.ttv.face.FaceResult;
 import com.ttv.facedemo.TTVFaceApplication;
 import com.ttv.facedemo.facedb.entity.FaceEntity;
 import com.ttv.facedemo.ui.model.CompareResult;
@@ -43,7 +45,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class FaceManager {
     private static final String TAG = "FaceManager";
-    private static FaceSDK faceEngine = null;
+    private static FaceEngine faceEngine = null;
     private static volatile FaceManager faceServer = null;
     private List<FaceEntity> faceRegisterInfoList;
     private String imageRootPath;
@@ -74,17 +76,8 @@ public class FaceManager {
     }
 
     public synchronized void init(Context context, OnInitFinishedCallback onInitFinishedCallback) {
-        if (faceEngine == null && context != null) {
-            faceEngine = new FaceSDK(context);
-            int engineCode = faceEngine.init(context, DetectMode.TTV_DETECT_MODE_IMAGE, DetectFaceOrientPriority.TTV_OP_ALL_OUT,
-                    1, FaceSDK.TTV_FACE_RECOGNITION | FaceSDK.TTV_FACE_DETECT | FaceSDK.TTV_MASK_DETECT);
-            if (engineCode == ErrorInfo.MOK) {
-                initFaceList(context, null, onInitFinishedCallback, false);
-            } else {
-                faceEngine = null;
-                Log.e(TAG, "init: failed! code = " + engineCode);
-            }
-        }
+        faceEngine = FaceEngine.getInstance(context);
+        initFaceList(context, null, onInitFinishedCallback, false);
         if (faceRegisterInfoList != null && onInitFinishedCallback != null) {
             onInitFinishedCallback.onFinished(faceRegisterInfoList.size());
         }
@@ -95,16 +88,10 @@ public class FaceManager {
             faceRegisterInfoList.clear();
             faceRegisterInfoList = null;
         }
-        if (faceEngine != null) {
-            synchronized (faceEngine) {
-                faceEngine.unInit();
-            }
-            faceEngine = null;
-        }
         faceServer = null;
     }
 
-    public void initFaceList(final Context context, FaceSDK faceEngine, final OnInitFinishedCallback onInitFinishedCallback, boolean recognize) {
+    public void initFaceList(final Context context, FaceEngine faceEngine, final OnInitFinishedCallback onInitFinishedCallback, boolean recognize) {
         Disposable disposable = Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
             if (recognize) {
                 List<FaceEntity> faceEntityList = FaceDatabase.getInstance(context).faceDao().getAllFaces();
@@ -152,53 +139,45 @@ public class FaceManager {
     }
 
     public boolean registerNv21(Context context, byte[] nv21, int width, int height, FacePreviewInfo faceInfo, String name,
-                                FaceSDK frEngine, FaceSDK registerFaceEngine) {
+                                FaceEngine faceEngine, FaceEngine registerFaceEngine) {
         if (registerFaceEngine == null || context == null || nv21 == null || width % 4 != 0 || nv21.length != width * height * 3 / 2) {
             Log.e(TAG, "registerNv21: invalid params");
             return false;
         }
-        FaceFeature faceFeature = new FaceFeature();
-        int code;
 
-        synchronized (registerFaceEngine) {
-            code = registerFaceEngine.extractFaceFeature(nv21, width, height, FaceSDK.CP_PAF_NV21, faceInfo.getFaceInfoRgb(),
-                    ExtractType.REGISTER, MaskInfo.NOT_WORN, faceFeature);
-        }
-        if (code != ErrorInfo.MOK) {
-            Log.e(TAG, "registerNv21: extractFaceFeature failed , code is " + code);
+        List<FaceResult> faceResults = new ArrayList<>();
+        faceResults.add(faceInfo.getFaceInfoRgb());
+
+        registerFaceEngine.extractFeature(nv21, width, height, true, faceResults);
+        Rect cropRect = getBestRect(width, height, faceInfo.getFaceInfoRgb().rect);
+        if (cropRect == null) {
+            Log.e(TAG, "registerNv21: cropRect is null!");
             return false;
-        } else {
-
-            Rect cropRect = getBestRect(width, height, faceInfo.getFaceInfoRgb().getRect());
-            if (cropRect == null) {
-                Log.e(TAG, "registerNv21: cropRect is null!");
-                return false;
-            }
-
-            cropRect.left &= ~3;
-            cropRect.top &= ~3;
-            cropRect.right &= ~3;
-            cropRect.bottom &= ~3;
-
-            Bitmap headBmp = getHeadImage(nv21, width, height, faceInfo.getFaceInfoRgb().getOrient(), cropRect, TTVImageFormat.NV21);
-            String imgPath = getImagePath(name);
-            try {
-                FileOutputStream fos = new FileOutputStream(imgPath);
-                headBmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-            FaceEntity faceEntity = new FaceEntity(name, imgPath, faceFeature.getFeatureData());
-            long faceId = FaceDatabase.getInstance(context).faceDao().insert(faceEntity);
-            faceEntity.setFaceId(faceId);
-            registerFaceFeatureInfoFromDb(faceEntity, frEngine);
-            return true;
         }
+
+        cropRect.left &= ~3;
+        cropRect.top &= ~3;
+        cropRect.right &= ~3;
+        cropRect.bottom &= ~3;
+
+        Bitmap headBmp = getHeadImage(nv21, width, height, faceInfo.getFaceInfoRgb().orient, cropRect, TTVImageFormat.NV21);
+        String imgPath = getImagePath(name);
+        try {
+            FileOutputStream fos = new FileOutputStream(imgPath);
+            headBmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        FaceEntity faceEntity = new FaceEntity(name, imgPath, faceResults.get(0).feature);
+        long faceId = FaceDatabase.getInstance(context).faceDao().insert(faceEntity);
+        faceEntity.setFaceId(faceId);
+        registerFaceFeatureInfoFromDb(faceEntity, faceEngine);
+        return true;
     }
 
-    private void registerFaceFeatureInfoListFromDb(FaceSDK faceEngine, List<FaceEntity> faceEntityList) {
+    private void registerFaceFeatureInfoListFromDb(FaceEngine faceEngine, List<FaceEntity> faceEntityList) {
         List<FaceFeatureInfo> faceFeatureInfoList = new ArrayList<>();
         for (FaceEntity faceEntity : faceEntityList) {
             FaceFeatureInfo faceFeatureInfo = new FaceFeatureInfo((int) faceEntity.getFaceId(), faceEntity.getFeatureData());
@@ -211,7 +190,7 @@ public class FaceManager {
         }
     }
 
-    private void registerFaceFeatureInfoFromDb(FaceEntity faceEntity, FaceSDK faceEngine) {
+    private void registerFaceFeatureInfoFromDb(FaceEntity faceEntity, FaceEngine faceEngine) {
         if (faceEntity != null && faceEngine != null) {
             FaceFeatureInfo faceFeatureInfo = new FaceFeatureInfo((int) faceEntity.getFaceId(), faceEntity.getFeatureData());
             int res = faceEngine.registerFaceFeature(faceFeatureInfo);
@@ -247,81 +226,66 @@ public class FaceManager {
         if (code != TTVImageUtilError.CODE_SUCCESS) {
             throw new RuntimeException("bitmapToImageData failed, code is " + code);
         }
-        return registerBgr24(context, imageData, bitmap.getWidth(), bitmap.getHeight(), name);
+        return registerBgr24(context, bitmap, name);
     }
 
-    public FaceEntity registerBgr24(Context context, byte[] bgr24, int width, int height, String name) {
-        if (faceEngine == null || context == null || bgr24 == null || width % 4 != 0 || bgr24.length != width * height * 3) {
+    public FaceEntity registerBgr24(Context context, Bitmap bitmap, String name) {
+        if (faceEngine == null || context == null || bitmap == null) {
             Log.e(TAG, "registerBgr24:  invalid params");
             return null;
         }
         //人脸检测
-        List<FaceInfo> faceInfoList = new ArrayList<>();
-        int code;
-        synchronized (faceEngine) {
-            code = faceEngine.detectFaces(bgr24, width, height, FaceSDK.CP_PAF_BGR24, faceInfoList);
-        }
-        if (code == ErrorInfo.MOK && !faceInfoList.isEmpty()) {
-            code = faceEngine.process(bgr24, width, height, FaceSDK.CP_PAF_BGR24, faceInfoList,
-                    FaceSDK.TTV_MASK_DETECT);
-            if (code == ErrorInfo.MOK) {
-                List<MaskInfo> maskInfoList = new ArrayList<>();
-                faceEngine.getMask(maskInfoList);
-                if (!maskInfoList.isEmpty()) {
-                    int isMask = maskInfoList.get(0).getMask();
-                    if (isMask == MaskInfo.WORN) {
-                         Log.e(TAG, "registerBgr24: maskInfo is worn");
-                        return null;
-                    }
-                }
-            }
-
-            FaceFeature faceFeature = new FaceFeature();
-
-            synchronized (faceEngine) {
-                code = faceEngine.extractFaceFeature(bgr24, width, height, FaceSDK.CP_PAF_BGR24, faceInfoList.get(0),
-                        ExtractType.REGISTER, MaskInfo.NOT_WORN, faceFeature);
-            }
-            String userName = name == null ? String.valueOf(System.currentTimeMillis()) : name;
-
-            if (code == ErrorInfo.MOK) {
-                Rect cropRect = getBestRect(width, height, faceInfoList.get(0).getRect());
-                if (cropRect == null) {
-                    Log.e(TAG, "registerBgr24: cropRect is null");
-                    return null;
-                }
-
-                cropRect.left &= ~3;
-                cropRect.top &= ~3;
-                cropRect.right &= ~3;
-                cropRect.bottom &= ~3;
-
-                String imgPath = getImagePath(userName);
-
-                Bitmap headBmp = getHeadImage(bgr24, width, height, faceInfoList.get(0).getOrient(), cropRect, TTVImageFormat.BGR24);
-
-                try {
-                    FileOutputStream fos = new FileOutputStream(imgPath);
-                    headBmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                    fos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-                if (faceRegisterInfoList == null) {
-                    faceRegisterInfoList = new ArrayList<>();
-                }
-                FaceEntity faceEntity = new FaceEntity(name, imgPath, faceFeature.getFeatureData());
-                long faceId = FaceDatabase.getInstance(context).faceDao().insert(faceEntity);
-                faceEntity.setFaceId(faceId);
-                faceRegisterInfoList.add(faceEntity);
-                return faceEntity;
-            } else {
-                Log.e(TAG, "registerBgr24: extract face feature failed, code is " + code);
+        List<FaceResult> faceInfoList = faceEngine.detectFace(bitmap);
+        if (!faceInfoList.isEmpty()) {
+            faceEngine.maskProcess(bitmap, faceInfoList);
+            int isMask = faceInfoList.get(0).mask;
+            if (isMask == MaskInfo.WORN) {
+                 Log.e(TAG, "registerBgr24: maskInfo is worn");
                 return null;
             }
+
+            faceEngine.extractFeature(bitmap, true, faceInfoList);
+            String userName = name == null ? String.valueOf(System.currentTimeMillis()) : name;
+
+            Rect cropRect = getBestRect(bitmap.getWidth(), bitmap.getHeight(), faceInfoList.get(0).rect);
+            if (cropRect == null) {
+                Log.e(TAG, "registerBgr24: cropRect is null");
+                return null;
+            }
+
+            cropRect.left &= ~3;
+            cropRect.top &= ~3;
+            cropRect.right &= ~3;
+            cropRect.bottom &= ~3;
+
+            String imgPath = getImagePath(userName);
+
+            byte[] imageData = TTVImageUtil.createImageData(bitmap.getWidth(), bitmap.getHeight(), TTVImageFormat.BGR24);
+            int code = TTVImageUtil.bitmapToImageData(bitmap, imageData, TTVImageFormat.BGR24);
+            if (code != TTVImageUtilError.CODE_SUCCESS) {
+                throw new RuntimeException("bitmapToImageData failed, code is " + code);
+            }
+
+            Bitmap headBmp = getHeadImage(imageData, bitmap.getWidth(), bitmap.getHeight(), faceInfoList.get(0).orient, cropRect, TTVImageFormat.BGR24);
+
+            try {
+                FileOutputStream fos = new FileOutputStream(imgPath);
+                headBmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+            if (faceRegisterInfoList == null) {
+                faceRegisterInfoList = new ArrayList<>();
+            }
+            FaceEntity faceEntity = new FaceEntity(name, imgPath, faceInfoList.get(0).feature);
+            long faceId = FaceDatabase.getInstance(context).faceDao().insert(faceEntity);
+            faceEntity.setFaceId(faceId);
+            faceRegisterInfoList.add(faceEntity);
+            return faceEntity;
         } else {
-            Log.e(TAG, "registerBgr24: no face detected, code is " + code);
+            Log.e(TAG, "registerBgr24: no face detected, code is ");
             return null;
         }
     }
@@ -375,7 +339,7 @@ public class FaceManager {
         return headBmp;
     }
 
-    public CompareResult searchFaceFeature(FaceFeature faceFeature, FaceSDK faceEngine) {
+    public CompareResult searchFaceFeature(FaceFeature faceFeature, FaceEngine faceEngine) {
         if (faceEngine == null || faceFeature == null) {
             return null;
         }

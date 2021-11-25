@@ -1,6 +1,7 @@
 package com.ttv.facedemo.data;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.ttv.facedemo.facedb.db.FaceDB;
@@ -55,8 +56,8 @@ public class FaceRepository {
         return faceServer.registerJpeg(context, bytes, name);
     }
 
-    public FaceEntity registerBgr24(Context context, byte[] bgr24Data, int width, int height, String name) {
-        return faceServer.registerBgr24(context, bgr24Data, width, height, name);
+    public FaceEntity registerBgr24(Context context, Bitmap bitmap, String name) {
+        return faceServer.registerBgr24(context, bitmap, name);
     }
 
     public int getTotalFaceCount() {

@@ -23,7 +23,7 @@ import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 
 import com.ttv.face.ErrorInfo;
-import com.ttv.face.FaceSDK;
+import com.ttv.face.FaceEngine;
 import com.ttv.facedemo.R;
 import com.ttv.facedemo.common.Base;
 import com.ttv.facedemo.databinding.ActivityHomeBinding;
@@ -50,14 +50,16 @@ public class HomeActivity extends BaseActivity  {
         try {
             license = Base.getStringFromFile(Base.getAppDir(this) + "/license.txt");
         } catch (Exception e){}
-        FaceSDK faceEngine = new FaceSDK(this);
-        int activated = faceEngine.setActivation(license);
+
+        int activated = FaceEngine.getInstance(this).setActivation(license);
         Log.e(TAG, "activation: " + activated);
         if(activated != ErrorInfo.MOK) {
             Intent intent = new Intent(this, ActivationActivity.class);
             startActivity(intent);
             finish();
         }
+
+        FaceEngine.getInstance(this).init(1);
     }
 
     private void initView() {
@@ -126,9 +128,13 @@ public class HomeActivity extends BaseActivity  {
     }
 
     public boolean permission() {
-        int write = ContextCompat.checkSelfPermission(getApplicationContext(), WRITE_EXTERNAL_STORAGE);
-        int read = ContextCompat.checkSelfPermission(getApplicationContext(), READ_EXTERNAL_STORAGE);
-        return write == PackageManager.PERMISSION_GRANTED && read == PackageManager.PERMISSION_GRANTED;
+/*        if (SDK_INT >= Build.VERSION_CODES.R) {
+            return Environment.isExternalStorageManager();
+        } else {*/
+            int write = ContextCompat.checkSelfPermission(getApplicationContext(), WRITE_EXTERNAL_STORAGE);
+            int read = ContextCompat.checkSelfPermission(getApplicationContext(), READ_EXTERNAL_STORAGE);
+            return write == PackageManager.PERMISSION_GRANTED && read == PackageManager.PERMISSION_GRANTED;
+        //}
     }
 
     private void openNewScreen() {
@@ -136,20 +142,20 @@ public class HomeActivity extends BaseActivity  {
     }
 
     public void RequestPermission_Dialog() {
-        /*if (SDK_INT >= Build.VERSION_CODES.R) {
-            try {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                intent.addCategory("android.intent.category.DEFAULT");
-                intent.setData(Uri.parse(String.format("package:%s", new Object[]{getApplicationContext().getPackageName()})));
-                startActivityForResult(intent, 2000);
-            } catch (Exception e) {
-                Intent obj = new Intent();
-                obj.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                startActivityForResult(obj, 2000);
-            }
-        } else */{
+//        if (SDK_INT >= Build.VERSION_CODES.R) {
+//            try {
+//                Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+//                intent.addCategory("android.intent.category.DEFAULT");
+//                intent.setData(Uri.parse(String.format("package:%s", new Object[]{getApplicationContext().getPackageName()})));
+//                startActivityForResult(intent, 2000);
+//            } catch (Exception e) {
+//                Intent obj = new Intent();
+//                obj.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+//                startActivityForResult(obj, 2000);
+//            }
+//        } else {
             ActivityCompat.requestPermissions(HomeActivity.this, new String[]{WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE}, 1);
-        }
+//        }
     }
 
     @Override

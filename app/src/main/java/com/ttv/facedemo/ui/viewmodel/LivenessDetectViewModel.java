@@ -9,6 +9,7 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.ttv.face.FaceEngine;
 import com.ttv.facedemo.TTVFaceApplication;
 import com.ttv.facedemo.R;
 import com.ttv.facedemo.util.ConfigUtil;
@@ -21,8 +22,6 @@ import com.ttv.facedemo.util.face.model.RecognizeConfiguration;
 import com.ttv.facedemo.widget.FaceRectView;
 import com.ttv.face.AgeInfo;
 import com.ttv.face.ErrorInfo;
-import com.ttv.face.FaceSDK;
-import com.ttv.face.FaceInfo;
 import com.ttv.face.GenderInfo;
 import com.ttv.face.LivenessInfo;
 import com.ttv.face.LivenessParam;
@@ -45,11 +44,7 @@ public class LivenessDetectViewModel extends ViewModel {
 
     private static final String TAG = "LivenessDetectViewModel";
 
-    private FaceSDK flEngine;
-    private FaceSDK ftEngine;
-
     private FaceHelper faceHelper;
-    private byte[] irNv21;
     private Camera.Size previewSize;
 
     private MutableLiveData<Integer> ftInitCode = new MutableLiveData<>();
@@ -57,48 +52,21 @@ public class LivenessDetectViewModel extends ViewModel {
 
     private int dualCameraHorizontalOffset;
     private int dualCameraVerticalOffset;
-    private int livenessMask;
     private boolean needUpdateFaceData;
     private ExecutorService livenessExecutor;
 
     private ConcurrentHashMap<Integer, Integer> rgbLivenessMap;
-    private ConcurrentHashMap<Integer, Integer> irLivenessMap;
     private final ReentrantLock livenessDetectLock = new ReentrantLock();
 
     public void init(boolean canOpenDualCamera) {
         Context context = TTVFaceApplication.getApplication();
-        String livenessTypeStr = ConfigUtil.getLivenessDetectType(TTVFaceApplication.getApplication());
-        LivenessType livenessType;
-        if (livenessTypeStr.equals(TTVFaceApplication.getApplication().getString(R.string.value_liveness_type_ir))) {
-            livenessType = LivenessType.IR;
-        } else {
-            livenessType = LivenessType.RGB;
-        }
         rgbLivenessMap = new ConcurrentHashMap<>();
-        if (canOpenDualCamera && livenessType == LivenessType.IR) {
-            irLivenessMap = new ConcurrentHashMap<>();
-            livenessMask = FaceSDK.TTV_LIVENESS | FaceSDK.TTV_IR_LIVENESS | FaceSDK.TTV_FACE_DETECT;
-        } else {
-            livenessMask = FaceSDK.TTV_LIVENESS;
-        }
 
         dualCameraHorizontalOffset = ConfigUtil.getDualCameraHorizontalOffset(context);
         dualCameraVerticalOffset = ConfigUtil.getDualCameraVerticalOffset(context);
         if (dualCameraHorizontalOffset != 0 || dualCameraVerticalOffset != 0) {
             needUpdateFaceData = true;
-            livenessMask |= FaceSDK.TTV_UPDATE_FACEDATA;
         }
-        LivenessParam livenessParam = new LivenessParam(ConfigUtil.getRgbLivenessThreshold(context), ConfigUtil.getIrLivenessThreshold(context), ConfigUtil.getLivenessFqThreshold(context));
-
-        ftEngine = new FaceSDK(context);
-        ftInitCode.postValue(ftEngine.init(context, DetectMode.TTV_DETECT_MODE_VIDEO, ConfigUtil.getFtOrient(context),
-                ConfigUtil.getRecognizeMaxDetectFaceNum(context), FaceSDK.TTV_FACE_DETECT));
-
-        flEngine = new FaceSDK(context);
-        flInitCode.postValue(flEngine.init(context, DetectMode.TTV_DETECT_MODE_IMAGE, ConfigUtil.getFtOrient(context),
-                ConfigUtil.getRecognizeMaxDetectFaceNum(context), livenessMask));
-        flEngine.setLivenessParam(livenessParam);
-
         livenessExecutor = new ThreadPoolExecutor(1, 1,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
@@ -110,18 +78,7 @@ public class LivenessDetectViewModel extends ViewModel {
     }
 
     private void unInit() {
-        if (ftEngine != null) {
-            synchronized (ftEngine) {
-                int ftUnInitCode = ftEngine.unInit();
-                Log.i(TAG, "unInitEngine: " + ftUnInitCode);
-            }
-        }
-        if (flEngine != null) {
-            synchronized (flEngine) {
-                int frUnInitCode = flEngine.unInit();
-                Log.i(TAG, "unInitEngine: " + frUnInitCode);
-            }
-        }
+
     }
 
     public void destroy() {
@@ -142,14 +99,10 @@ public class LivenessDetectViewModel extends ViewModel {
         faceHelper.setRgbFaceRectTransformer(rgbFaceRectTransformer);
     }
 
-    public void setIrFaceRectTransformer(FaceRectTransformer irFaceRectTransformer) {
-        faceHelper.setIrFaceRectTransformer(irFaceRectTransformer);
-    }
-
     public List<FacePreviewInfo> onPreviewFrame(byte[] nv21) {
-        List<FacePreviewInfo> facePreviewInfoList = faceHelper.onPreviewFrame(nv21, irNv21, false);
+        List<FacePreviewInfo> facePreviewInfoList = faceHelper.onPreviewFrame(nv21, null, false);
         clearLeftFace(facePreviewInfoList);
-        return processLiveness(nv21, irNv21, facePreviewInfoList);
+        return processLiveness(nv21, null, facePreviewInfoList);
     }
 
     private void clearLeftFace(List<FacePreviewInfo> facePreviewInfoList) {
@@ -165,9 +118,6 @@ public class LivenessDetectViewModel extends ViewModel {
             }
             if (!contained) {
                 rgbLivenessMap.remove(key);
-                if (irLivenessMap != null) {
-                    irLivenessMap.remove(key);
-                }
             }
         }
     }
@@ -181,46 +131,16 @@ public class LivenessDetectViewModel extends ViewModel {
                 List<FacePreviewInfo> facePreviewInfoList = new LinkedList<>(previewInfoList);
                 livenessDetectLock.lock();
                 try {
-                    int processRgbLivenessCode;
+                    Context context = TTVFaceApplication.getApplication();
+
                     if (facePreviewInfoList.isEmpty()) {
                         Log.e(TAG, "facePreviewInfoList isEmpty");
                     } else {
-                        synchronized (flEngine) {
-                            processRgbLivenessCode = flEngine.process(nv21, previewSize.width, previewSize.height, FaceSDK.CP_PAF_NV21,
-                                    new ArrayList<>(Collections.singletonList(facePreviewInfoList.get(0).getFaceInfoRgb())), FaceSDK.TTV_LIVENESS);
-                        }
-                        if (processRgbLivenessCode != ErrorInfo.MOK) {
-                            Log.e(TAG, "process RGB Liveness error: " + processRgbLivenessCode);
-                        } else {
-                            List<LivenessInfo> rgbLivenessInfoList = new ArrayList<>();
-                            int getRgbLivenessCode = flEngine.getLiveness(rgbLivenessInfoList);
-                            if (getRgbLivenessCode != ErrorInfo.MOK) {
-                                Log.e(TAG, "get RGB LivenessResult error: " + getRgbLivenessCode);
-                            } else {
-                                rgbLivenessMap.put(facePreviewInfoList.get(0).getTrackId(), rgbLivenessInfoList.get(0).getLiveness());
-                            }
-                        }
-                        if ((livenessMask & FaceSDK.TTV_IR_LIVENESS) != 0) {
-                            List<FaceInfo> faceInfoList = new ArrayList<>();
-                            FaceInfo irFaceInfo = facePreviewInfoList.get(0).getFaceInfoIr();
-                            int fdCode = flEngine.detectFaces(irNv21, previewSize.width, previewSize.height, FaceSDK.CP_PAF_NV21, faceInfoList);
-                            if (fdCode == ErrorInfo.MOK && FaceHelper.isFaceExists(faceInfoList, irFaceInfo)) {
-                                if (needUpdateFaceData) {
 
-                                    int faceDataCode = flEngine.updateFaceData(irNv21, previewSize.width, previewSize.height, FaceSDK.CP_PAF_NV21,
-                                            new ArrayList<>(Collections.singletonList(irFaceInfo)));
-                                    if (faceDataCode != ErrorInfo.MOK) {
-                                        Log.e(TAG, "process IR faceData error: " + faceDataCode);
-                                    } else {
-                                        processIrLive(irFaceInfo, facePreviewInfoList.get(0).getTrackId());
-                                    }
-                                } else {
-                                    processIrLive(irFaceInfo, facePreviewInfoList.get(0).getTrackId());
-                                }
-                            } else {
-                                Log.e(TAG, "process IR Liveness error: " + fdCode);
-                            }
-                        }
+                        FaceEngine.getInstance(context).livenessProcess(nv21, previewSize.width, previewSize.height,
+                                new ArrayList<>(Collections.singletonList(facePreviewInfoList.get(0).getFaceInfoRgb())));
+
+                        rgbLivenessMap.put(facePreviewInfoList.get(0).getTrackId(), facePreviewInfoList.get(0).getFaceInfoRgb().liveness);
                     }
                 } finally {
                     livenessDetectLock.unlock();
@@ -232,46 +152,9 @@ public class LivenessDetectViewModel extends ViewModel {
             if (rgbLiveness != null) {
                 facePreviewInfo.setRgbLiveness(rgbLiveness);
             }
-            if (irLivenessMap != null) {
-                Integer irLiveness = irLivenessMap.get(facePreviewInfo.getTrackId());
-                if (irLiveness != null) {
-                    facePreviewInfo.setIrLiveness(irLiveness);
-                }
-            }
         }
         return previewInfoList;
     }
-
-    private void processIrLive(FaceInfo irFaceInfo, int trackId) {
-        int processIrLivenessCode;
-        synchronized (flEngine) {
-            processIrLivenessCode = flEngine.processIr(irNv21, previewSize.width, previewSize.height, FaceSDK.CP_PAF_NV21,
-                    Arrays.asList(irFaceInfo), FaceSDK.TTV_IR_LIVENESS);
-        }
-        if (processIrLivenessCode != ErrorInfo.MOK) {
-            Log.e(TAG, "process IR Liveness error: " + processIrLivenessCode);
-        } else {
-            List<LivenessInfo> irLivenessInfoList = new ArrayList<>();
-            int getIrLivenessCode = flEngine.getIrLiveness(irLivenessInfoList);
-            if (getIrLivenessCode != ErrorInfo.MOK) {
-                Log.e(TAG, "get IR LivenessResult error: " + getIrLivenessCode);
-            } else {
-                irLivenessMap.put(trackId, irLivenessInfoList.get(0).getLiveness());
-            }
-        }
-    }
-
-    public void onIrCameraOpened(Camera camera) {
-        Camera.Size lastPreviewSize = previewSize;
-        previewSize = camera.getParameters().getPreviewSize();
-        initFaceHelper(lastPreviewSize);
-        faceHelper.setDualCameraFaceInfoTransformer(faceInfo -> {
-            FaceInfo irFaceInfo = new FaceInfo(faceInfo);
-            irFaceInfo.getRect().offset(dualCameraHorizontalOffset, dualCameraVerticalOffset);
-            return irFaceInfo;
-        });
-    }
-
     private void initFaceHelper(Camera.Size lastPreviewSize) {
         if (faceHelper == null ||
                 lastPreviewSize == null ||
@@ -284,7 +167,7 @@ public class LivenessDetectViewModel extends ViewModel {
             Context context = TTVFaceApplication.getApplication().getApplicationContext();
 
             faceHelper = new FaceHelper.Builder()
-                    .ftEngine(ftEngine)
+                    .faceEngine(FaceEngine.getInstance(context))
                     .previewSize(previewSize)
                     .onlyDetectLiveness(true)
                     .recognizeConfiguration(new RecognizeConfiguration.Builder().keepMaxFace(true).build())
@@ -293,14 +176,10 @@ public class LivenessDetectViewModel extends ViewModel {
         }
     }
 
-    public void refreshIrPreviewData(byte[] nv21) {
-        irNv21 = nv21;
-    }
-
     public List<FaceRectView.DrawInfo> getDrawInfo(List<FacePreviewInfo> facePreviewInfoList, LivenessType livenessType) {
         List<FaceRectView.DrawInfo> drawInfoList = new ArrayList<>();
         for (int i = 0; i < facePreviewInfoList.size(); i++) {
-            int liveness = livenessType == LivenessType.RGB ? facePreviewInfoList.get(i).getRgbLiveness() : facePreviewInfoList.get(i).getIrLiveness();
+            int liveness = facePreviewInfoList.get(i).getRgbLiveness();
             Rect rect = livenessType == LivenessType.RGB ?
                     facePreviewInfoList.get(i).getRgbTransformedRect() :
                     facePreviewInfoList.get(i).getIrTransformedRect();
