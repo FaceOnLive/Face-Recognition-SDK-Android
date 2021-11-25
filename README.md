@@ -5,6 +5,10 @@
 <a href="https://twitter.com/intent/tweet?text=Fast,%20Accurate,%20Mask-Aware%20Face%20Recognition%20SDK%20with%20Liveness%20Detection%0D%0D&url=https://github.com/FaceOnLive/Mask-Aware-Face-Recognition-SDK-Android/%0D%0D&hashtags=facerecognition,livenessdetection,android,developers"><img src="http://randojs.com/images/tweetShield.svg" alt="Tweet" height="20"/></a>&emsp;<a href="https://t.me/faceonlive"><img src="https://badgen.net/badge/icon/telegram?icon=telegram&label" alt="Telegram" height="20"/></a>
 </p>
 
+## :muscle:  Partnership / Cooperation / Project Discussion
+&emsp;<a href="mailto:contact@faceonlive.com?subject=[GitHub]%20Face%20Recognition%20SDK%20Android"><img src="https://img.shields.io/badge/mail-%23DD0031.svg?&style=flat&logo=gmail&logoColor=white"  height="64"/></a>
+</br>
+</br>
 
 ## :tada:  Try It Yourself
 <a href="https://play.google.com/store/apps/details?id=com.ttv.facedemo" target="_blank">
