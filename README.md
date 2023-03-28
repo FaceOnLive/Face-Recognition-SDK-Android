@@ -1,3 +1,5 @@
+✨ Update: Our API portal is now live, offering free APIs for various AI solutions, including face recognition, liveness detection, and ID document recognition.
+Make sure to check it out at https://getapi.faceonlive.com and take advantage of our free offerings.
 <h1 align="center">Mask-Aware Face Recognition SDK For Android</h1>
 <p align="center">NIST FRVT Certified, Fast, Accurate, Mask-Aware Face Recognition SDK with Liveness Detection</p>
 
