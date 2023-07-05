@@ -37,6 +37,21 @@
             android:layout_centerHorizontal="true"
             android:text="Users" />
 
+
+        <TextView
+            android:id="@+id/txtInit"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="Init Error!"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            android:background="@color/teal_700"
+            >
+
+        </TextView>
     </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

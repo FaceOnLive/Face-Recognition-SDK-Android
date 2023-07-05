@@ -2,6 +2,7 @@ package com.ttv.facerecog
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ListView
 import android.widget.Toast
@@ -40,12 +41,12 @@ class UserActivity : AppCompatActivity(){
                             dialog.cancel()
                         }
                         1 -> {
-                            mydb!!.deleteAllUser()
-                            MainActivity.userLists.clear()
                             for(user in MainActivity.userLists) {
                                 FaceEngine.getInstance(applicationContext).removeFaceFeature(user.user_id)
                             }
 
+                            mydb!!.deleteAllUser()
+                            MainActivity.userLists.clear()
                             adapter.notifyDataSetChanged()
                             dialog.cancel()
                         }

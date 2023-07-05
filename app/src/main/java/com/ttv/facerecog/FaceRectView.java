@@ -106,6 +106,10 @@ public class FaceRectView extends View {
         private int age;
         private int maskInfo;
         private int liveness;
+
+        private float yaw;
+        private float roll;
+        private float pitch;
         private int color;
         private int isWithinBoundary;
         private String name = null;
@@ -113,13 +117,17 @@ public class FaceRectView extends View {
         private Rect foreheadRect;
         private boolean rgbRect;
 
-        public DrawInfo(Rect rect, int sex, int age, int liveness, int color, String name) {
+        public DrawInfo(Rect rect, int sex, int age, int mask, float yaw, float roll, float pitch, int liveness, int color, String name) {
             this.rect = rect;
             this.sex = sex;
             this.age = age;
             this.liveness = liveness;
             this.color = color;
             this.name = name;
+            this.maskInfo = mask;
+            this.yaw = yaw;
+            this.roll = roll;
+            this.pitch = pitch;
         }
 
         public DrawInfo(DrawInfo drawInfo) {
@@ -132,6 +140,10 @@ public class FaceRectView extends View {
             this.liveness = drawInfo.liveness;
             this.color = drawInfo.color;
             this.name = drawInfo.name;
+            this.maskInfo = drawInfo.maskInfo;
+            this.yaw = drawInfo.yaw;
+            this.roll = drawInfo.roll;
+            this.pitch = drawInfo.pitch;
         }
 
         public String getName() {
@@ -252,9 +264,18 @@ public class FaceRectView extends View {
         paint.setTextSize(rect.width() / 12);
         String str = (drawInfo.getLiveness() == 1 ? "REAL" : "FAKE");
         if(drawInfo.getLiveness() < 0)
-            str = "";
+            str = "SMALL FACE";
 
         canvas.drawText(str, rect.left, rect.top - 10, paint);
+
+        String strInfo2 = "Age: " + drawInfo.age + ", Gender: " + (drawInfo.getSex() == 0 ? "Male" : "Female");
+        canvas.drawText(strInfo2, rect.left, rect.top - 55, paint);
+
+        String yaw = String.format("%.03f", drawInfo.yaw);
+        String roll = String.format("%.03f", drawInfo.roll);
+        String pitch = String.format("%.03f", drawInfo.pitch);
+        String strInfo3 = "Angles: " + yaw + ", " + roll + ", " + pitch;
+        canvas.drawText(strInfo3, rect.left, rect.top - 100, paint);
 
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
         int textSize = rect.width() / 8;
@@ -263,8 +284,8 @@ public class FaceRectView extends View {
         int defX = rect.left;
         int defY = rect.bottom + rect.width() / 8;
 
-//        String strInfo1 = "Mask: " + (drawInfo.getMaskInfo() == 1 ? "Yes" : "No");
-//        canvas.drawText(strInfo1, defX, defY, paint);
+        String strInfo1 = "Mask: " + (drawInfo.getMaskInfo() == 1 ? "Yes" : "No");
+        canvas.drawText(strInfo1, defX, defY, paint);
     }
 
 }

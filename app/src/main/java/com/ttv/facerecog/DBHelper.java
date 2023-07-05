@@ -75,6 +75,18 @@ public class DBHelper extends SQLiteOpenHelper {
         return user_id;
     }
 
+    public int getLastUserId() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery( "select max(user_id) from users", null );
+        res.moveToFirst();
+
+        int userId = 0;
+        while(res.isAfterLast() == false){
+            userId = res.getInt(0);
+            res.moveToNext();
+        }
+        return userId;
+    }
     public Cursor getData(String name) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select * from users where name="+name, null );

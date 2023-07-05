@@ -1,5 +1,6 @@
 package com.ttv.facerecog
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -41,6 +42,7 @@ class CameraActivity : AppCompatActivity() {
     private var recogName:String = ""
 
     private val mHandler: Handler = object : Handler() {
+        @SuppressLint("HandlerLeak")
         override fun handleMessage(msg: Message) {
             val i: Int = msg.what
             if (i == 0) {
@@ -51,9 +53,11 @@ class CameraActivity : AppCompatActivity() {
                     var rect : Rect = faceRectTransformer!!.adjustRect(faceResult.rect);
                     var drawInfo : FaceRectView.DrawInfo;
                     if(faceResult.liveness == 1)
-                        drawInfo = FaceRectView.DrawInfo(rect, 0, 0, 1, Color.GREEN, null);
+                        drawInfo = FaceRectView.DrawInfo(rect, faceResult.gender, faceResult.age, faceResult.mask, faceResult.yaw, faceResult.roll, faceResult.pitch, 1, Color.GREEN, null);
+                    else if(faceResult.liveness == 0)
+                        drawInfo = FaceRectView.DrawInfo(rect, faceResult.gender, faceResult.age, faceResult.mask, faceResult.yaw, faceResult.roll, faceResult.pitch, 0, Color.RED, null)
                     else
-                        drawInfo = FaceRectView.DrawInfo(rect, 0, 0, 0, Color.RED, null);
+                        drawInfo = FaceRectView.DrawInfo(rect, faceResult.gender, faceResult.age, faceResult.mask, faceResult.yaw, faceResult.roll, faceResult.pitch, -1, Color.YELLOW, null)
 
                     drawInfoList.add(drawInfo);
                 }
@@ -189,15 +193,28 @@ class CameraActivity : AppCompatActivity() {
             val faceResults:List<FaceResult> = FaceEngine.getInstance(appCtx).detectFace(frame.image, frame.size.width, frame.size.height)
             if(faceResults.count() > 0) {
                 FaceEngine.getInstance(appCtx).livenessProcess(frame.image, frame.size.width, frame.size.height, faceResults)
-                if(frThreadQueue!!.remainingCapacity() > 0) {
-                    frExecutor!!.execute(
-                        FaceRecognizeRunnable(
-                            frame.image,
-                            frame.size.width,
-                            frame.size.height,
-                            faceResults
+                FaceEngine.getInstance(appCtx).faceAttrProcess(frame.image, frame.size.width, frame.size.height, faceResults)
+
+                for(i in 0..faceResults.size - 1) {
+                    val minWidth = Math.min(frame.size.width, frame.size.height)
+                    val rectWidth = faceResults[i].rect.width()
+
+                    if(rectWidth / minWidth.toFloat() < 0.5f) {
+                        faceResults[i].liveness = -1
+                    }
+                }
+
+                if(faceResults.size == 1 && faceResults[0].liveness == 1) {
+                    if(frThreadQueue!!.remainingCapacity() > 0) {
+                        frExecutor!!.execute(
+                            FaceRecognizeRunnable(
+                                frame.image,
+                                frame.size.width,
+                                frame.size.height,
+                                faceResults
+                            )
                         )
-                    )
+                    }
                 }
             }
             if(adjustPreview(frame.size.width, frame.size.height, frame.rotation))
