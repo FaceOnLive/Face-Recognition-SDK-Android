@@ -27,9 +27,8 @@ https://user-images.githubusercontent.com/91896009/137511577-57d95888-0157-44aa-
 
 
 ## :clap:  Supporters
-[![Stargazers repo roster for @faceonlive/Mask-Aware-Face-Recognition-SDK-Android](https://reporoster.com/stars/faceonlive/Mask-Aware-Face-Recognition-SDK-Android)](https://github.com/faceonlive/Mask-Aware-Face-Recognition-SDK-Android/stargazers)
-[![Forkers repo roster for @faceonlive/Mask-Aware-Face-Recognition-SDK-Android](https://reporoster.com/forks/faceonlive/Mask-Aware-Face-Recognition-SDK-Android)](https://github.com/faceonlive/Mask-Aware-Face-Recognition-SDK-Android/network/members)
-<p align="center"><a href="https://github.com/nastyox/Rando.js#nastyox"><img src="http://randojs.com/images/barsSmallTransparentBackground.gif" alt="Animated footer bars" width="100%"/></a></p>
+[![Stargazers repo roster for @faceonlive/Face-Recognition-SDK-Android](https://reporoster.com/stars/faceonlive/Face-Recognition-SDK-Android)](https://github.com/faceonlive/Face-Recognition-SDK-Android/stargazers)
+[![Forkers repo roster for @faceonlive/Face-Recognition-SDK-Android](https://reporoster.com/forks/faceonlive/Face-Recognition-SDK-Android)](https://github.com/faceonlive/Face-Recognition-SDK-Android/network/members)
 
 
 ## 🏃  Usage SDK
