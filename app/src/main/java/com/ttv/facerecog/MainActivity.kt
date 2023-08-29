@@ -18,9 +18,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.ttv.face.*
-import com.ttv.imageutil.TTVImageFormat
-import com.ttv.imageutil.TTVImageUtil
-import com.ttv.imageutil.TTVImageUtilError
 import org.json.JSONObject
 import java.nio.ByteBuffer
 import java.util.ArrayList
@@ -42,14 +39,18 @@ class MainActivity : AppCompatActivity(){
         setContentView(R.layout.activity_main)
 
         context = this
-        var ret = FaceEngine.getInstance(this).setActivation("{\n" +
+        FaceEngine.createInstance(this)
+        var ret = FaceEngine.getInstance().setActivation("{\n" +
                 "  \"licenseKey\": \"eyJQcm9kdWN0SWQiOjIwNzg1LCJJRCI6MSwiS2V5IjoiTVlMQ08tU0JVREQtUFhRSlctSklNRVoiLCJDcmVhdGVkIjoxNjg4NTI3Mzc0LCJFeHBpcmVzIjoxNzA1ODA3Mzc0LCJQZXJpb2QiOjIwMCwiRjEiOnRydWUsIkYyIjpmYWxzZSwiRjMiOmZhbHNlLCJGNCI6ZmFsc2UsIkY1IjpmYWxzZSwiRjYiOmZhbHNlLCJGNyI6ZmFsc2UsIkY4IjpmYWxzZSwiTm90ZXMiOm51bGwsIkJsb2NrIjpmYWxzZSwiR2xvYmFsSWQiOjM1OTQxMSwiQ3VzdG9tZXIiOm51bGwsIkFjdGl2YXRlZE1hY2hpbmVzIjpbeyJNaWQiOiJjb20udHR2LmZhY2VkZW1vIiwiSVAiOiI4OC45OS4xNDUuNyIsIlRpbWUiOjE2ODg1Mjc0NDR9XSwiVHJpYWxBY3RpdmF0aW9uIjpmYWxzZSwiTWF4Tm9PZk1hY2hpbmVzIjoxLCJBbGxvd2VkTWFjaGluZXMiOiIiLCJEYXRhT2JqZWN0cyI6W10sIlNpZ25EYXRlIjoxNjg4NTI3NDQ0fQ==\",\n" +
                 "  \"signature\": \"DzA6tC4ByQqtmJvLltg8eDNsGUNZLqV2vEjwSZESjDFPQnI0QN/h+s8Pr0teZ0fg5rfEQ6JV0YXy0crB3k8OXLYLHaqKWZG/gQp4XSzj7o+2lFZWFQMqsyBb/0c8fZx3AoILEqGa8xoDWiibE21aeAVfdAUaGODBZnFRA9ytdsvesInyyzKZmjtHjKDR0MLgIBk3QJKxXaI+RU2NoV7UDrruOoGXeljvjjiwOispmxGPTYri9QkDeQyGcmer3+BeAFKmvd6xWOzHGp53wv7VYIC42ETU6hxvVZqAFJ2ujvtvzIzpZ615Qq1eVyFljCU2u0Clfb2oTsoefyKhLlLQTQ==\",\n" +
                 "  \"result\": 0,\n" +
                 "  \"message\": \"\"\n" +
                 "}")
+
+        Log.e("TestEngine", "activation ret: " + ret)
+
         if(ret == FaceEngine.F_OK) {
-            ret = FaceEngine.getInstance(this).init(10)
+            ret = FaceEngine.getInstance().init()
 
             mydb = DBHelper(this)
             mydb!!.getAllUsers()
@@ -65,7 +66,7 @@ class MainActivity : AppCompatActivity(){
                 txtInit.text = "License Key Error!"
             } else if(ret == FaceEngine.F_LICENSE_EXPIRED) {
                 txtInit.text = "License Expired!"
-            } else if(ret == FaceEngine.F_LICENSE_EXPIRED) {
+            } else if(ret == FaceEngine.F_INIT_ERROR) {
                 txtInit.text = "Init Error!"
             }
         }
@@ -99,32 +100,65 @@ class MainActivity : AppCompatActivity(){
         if (requestCode == 1 && resultCode == RESULT_OK) {
             try {
                 var bitmap: Bitmap = ImageRotator.getCorrectlyOrientedImage(this, data?.data!!)
-                val faceResults:MutableList<FaceResult> = FaceEngine.getInstance(this).detectFace(bitmap)
+                val faceResults:MutableList<FaceResult> = FaceEngine.getInstance().detectFaceFromBitmap(bitmap)
 
-                if(faceResults.size > 0) {
-                    FaceEngine.getInstance(this).extractFeature(bitmap, true, faceResults)
+                if(faceResults.count() == 1) {
 
-                    for(i in 0..faceResults.size - 1) {
-                        val userName = String.format("User%03d", mydb!!.lastUserId + 1)
-                        val cropRect = Utils.getBestRect(bitmap.width, bitmap.height, faceResults.get(i).rect)
-                        val headImg = Utils.crop(bitmap, cropRect.left, cropRect.top, cropRect.width(), cropRect.height(), 120, 120)
+                    FaceEngine.getInstance().extractFeatureFromBitmap(bitmap, faceResults)
 
-                        val user_id = mydb!!.insertUser(userName, headImg, faceResults.get(i).feature)
-                        val face = FaceEntity(user_id, userName, headImg, faceResults.get(i).feature)
-                        userLists.add(face)
+                    val userName = String.format("User%03d", mydb!!.lastUserId + 1)
+                    val cropRect = Utils.getBestRect(bitmap.width, bitmap.height, Rect(faceResults.get(0).left, faceResults.get(0).top, faceResults.get(0).right, faceResults.get(0).bottom))
+                    val headImg = Utils.crop(bitmap, cropRect.left, cropRect.top, cropRect.width(), cropRect.height(), 120, 120)
 
-                        val faceFeatureInfo = FaceFeatureInfo(
-                            user_id,
-                            faceResults.get(i).feature
+                    val inputView = LayoutInflater.from(context)
+                        .inflate(R.layout.dialog_input_view, null, false)
+                    val editText = inputView.findViewById<EditText>(R.id.et_user_name)
+                    val ivHead = inputView.findViewById<ImageView>(R.id.iv_head)
+                    ivHead.setImageBitmap(headImg)
+                    editText.setText(userName)
+                    val confirmUpdateDialog: AlertDialog = AlertDialog.Builder(context!!)
+                        .setView(inputView)
+                        .setPositiveButton(
+                            "OK", null
                         )
+                        .setNegativeButton(
+                            "Cancel", null
+                        )
+                        .create()
+                    confirmUpdateDialog.show()
+                    confirmUpdateDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                        .setOnClickListener { v: View? ->
+                            val s = editText.text.toString()
+                            if (TextUtils.isEmpty(s)) {
+                                editText.error = application.getString(R.string.name_should_not_be_empty)
+                                return@setOnClickListener
+                            }
 
-                        FaceEngine.getInstance(this).registerFaceFeature(faceFeatureInfo)
+                            var exists:Boolean = false
+                            for(user in userLists) {
+                                if(TextUtils.equals(user.userName, s)) {
+                                    exists = true
+                                    break
+                                }
+                            }
 
-                        findViewById<Button>(R.id.btnVerify).isEnabled = userLists.size > 0
-                    }
-                    Toast.makeText(this, "Register succeed!", Toast.LENGTH_SHORT).show()
-                }
-                else {
+                            if(exists) {
+                                editText.error = application.getString(R.string.duplicated_name)
+                                return@setOnClickListener
+                            }
+
+                            val user_id = mydb!!.insertUser(s, headImg, faceResults.get(0).feature)
+                            val face = FaceEntity(user_id, s, headImg, faceResults.get(0).feature)
+                            userLists.add(face)
+
+                            confirmUpdateDialog.cancel()
+
+                            Toast.makeText(this, "Register succeed!", Toast.LENGTH_SHORT).show()
+                        }
+
+                } else if(faceResults.count() > 1) {
+                    Toast.makeText(this, "Multiple face detected!", Toast.LENGTH_SHORT).show()
+                } else {
                     Toast.makeText(this, "No face detected!", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: java.lang.Exception) {
@@ -133,9 +167,10 @@ class MainActivity : AppCompatActivity(){
             }
         } else if(requestCode == 2 && resultCode == RESULT_OK) {
             val verifyResult = data!!.getIntExtra ("verifyResult", 0)
-            val recogName = data!!.getStringExtra ("verifyName")
             if(verifyResult == 1) {
-                Toast.makeText(this, "Verify succeed! " + recogName, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Verify succeed!", Toast.LENGTH_SHORT).show()
+            } else if(verifyResult == -1) {
+                Toast.makeText(this, "Liveness failed!", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Verify failed!", Toast.LENGTH_SHORT).show()
             }

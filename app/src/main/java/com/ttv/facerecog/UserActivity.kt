@@ -34,17 +34,12 @@ class UserActivity : AppCompatActivity(){
                         0 -> {
 
                             mydb!!.deleteUser(MainActivity.userLists.get(i).userName)
-                            FaceEngine.getInstance(applicationContext).removeFaceFeature(MainActivity.userLists.get(i).user_id)
                             MainActivity.userLists.removeAt(i)
 
                             adapter.notifyDataSetChanged()
                             dialog.cancel()
                         }
                         1 -> {
-                            for(user in MainActivity.userLists) {
-                                FaceEngine.getInstance(applicationContext).removeFaceFeature(user.user_id)
-                            }
-
                             mydb!!.deleteAllUser()
                             MainActivity.userLists.clear()
                             adapter.notifyDataSetChanged()

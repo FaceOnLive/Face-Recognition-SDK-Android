@@ -1,8 +1,8 @@
 package com.ttv.facerecog
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import android.icu.util.UniversalTimeScale.toLong
@@ -15,7 +15,6 @@ import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import com.ttv.face.*
-import com.ttv.face.enums.ExtractType
 import io.fotoapparat.Fotoapparat
 import io.fotoapparat.parameter.Resolution
 import io.fotoapparat.preview.Frame
@@ -40,9 +39,9 @@ class CameraActivity : AppCompatActivity() {
     private var startVerifyTime: Long = 0
     private var mydb: DBHelper? = null
     private var recogName:String = ""
+    private val LIVENESS_THRESHOLD: Float = 0.7f
 
     private val mHandler: Handler = object : Handler() {
-        @SuppressLint("HandlerLeak")
         override fun handleMessage(msg: Message) {
             val i: Int = msg.what
             if (i == 0) {
@@ -50,14 +49,14 @@ class CameraActivity : AppCompatActivity() {
                 var detectionResult = msg.obj as ArrayList<FaceResult>
 
                 for(faceResult in detectionResult) {
-                    var rect : Rect = faceRectTransformer!!.adjustRect(faceResult.rect);
+                    var rect : Rect = faceRectTransformer!!.adjustRect(Rect(faceResult.left, faceResult.top, faceResult.right, faceResult.bottom));
                     var drawInfo : FaceRectView.DrawInfo;
-                    if(faceResult.liveness == 1)
-                        drawInfo = FaceRectView.DrawInfo(rect, faceResult.gender, faceResult.age, faceResult.mask, faceResult.yaw, faceResult.roll, faceResult.pitch, 1, Color.GREEN, null);
-                    else if(faceResult.liveness == 0)
-                        drawInfo = FaceRectView.DrawInfo(rect, faceResult.gender, faceResult.age, faceResult.mask, faceResult.yaw, faceResult.roll, faceResult.pitch, 0, Color.RED, null)
+                    if(faceResult.liveness > LIVENESS_THRESHOLD)
+                        drawInfo = FaceRectView.DrawInfo(rect, 0, 0, 1, Color.GREEN, null);
+                    else if(faceResult.liveness == -200.0f)
+                        drawInfo = FaceRectView.DrawInfo(rect, 0, 0, 1, Color.YELLOW, null);
                     else
-                        drawInfo = FaceRectView.DrawInfo(rect, faceResult.gender, faceResult.age, faceResult.mask, faceResult.yaw, faceResult.roll, faceResult.pitch, -1, Color.YELLOW, null)
+                        drawInfo = FaceRectView.DrawInfo(rect, 0, 0, 0, Color.RED, null);
 
                     drawInfoList.add(drawInfo);
                 }
@@ -130,18 +129,21 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    fun adjustPreview(frameWidth: Int, frameHeight: Int, rotation: Int) : Boolean{
+    fun adjustPreview() : Boolean{
         if(faceRectTransformer == null) {
-            val frameSize: Size = Size(frameWidth, frameHeight);
+            val frameSize: Size = Size(1280, 720);
             if(cameraView!!.measuredWidth == 0)
                 return false;
 
-            adjustPreviewViewSize (cameraView!!, rectanglesView!!);
+            var displayOrientation: Int = 90;
+            adjustPreviewViewSize (cameraView!!,
+                cameraView!!, rectanglesView!!,
+                Size(frameSize.width, frameSize.height), displayOrientation, 1.0f);
 
             faceRectTransformer = FaceRectTransformer (
-                frameSize.width, frameSize.height,
+                frameSize.height, frameSize.width,
                 cameraView!!.getLayoutParams().width, cameraView!!.getLayoutParams().height,
-                rotation, 0, false,
+                0, 1, false,
                 false,
                 false);
 
@@ -152,8 +154,12 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun adjustPreviewViewSize(
+        rgbPreview: View,
         previewView: View,
         faceRectView: FaceRectView,
+        previewSize: Size,
+        displayOrientation: Int,
+        scale: Float
     ): ViewGroup.LayoutParams? {
         val layoutParams = previewView.layoutParams
         val measuredWidth = previewView.measuredWidth
@@ -190,34 +196,21 @@ class CameraActivity : AppCompatActivity() {
         }
 
         override fun invoke(frame: Frame) {
-            val faceResults:List<FaceResult> = FaceEngine.getInstance(appCtx).detectFace(frame.image, frame.size.width, frame.size.height)
+            val faceResults:List<FaceResult> = FaceEngine.getInstance().detectFaceFromYuv(frame.image, frame.size.width, frame.size.height, 7)
             if(faceResults.count() > 0) {
-                FaceEngine.getInstance(appCtx).livenessProcess(frame.image, frame.size.width, frame.size.height, faceResults)
-                FaceEngine.getInstance(appCtx).faceAttrProcess(frame.image, frame.size.width, frame.size.height, faceResults)
-
-                for(i in 0..faceResults.size - 1) {
-                    val minWidth = Math.min(frame.size.width, frame.size.height)
-                    val rectWidth = faceResults[i].rect.width()
-
-                    if(rectWidth / minWidth.toFloat() < 0.5f) {
-                        faceResults[i].liveness = -1
-                    }
-                }
-
-                if(faceResults.size == 1 && faceResults[0].liveness == 1) {
-                    if(frThreadQueue!!.remainingCapacity() > 0) {
-                        frExecutor!!.execute(
-                            FaceRecognizeRunnable(
-                                frame.image,
-                                frame.size.width,
-                                frame.size.height,
-                                faceResults
-                            )
+                if(frThreadQueue!!.remainingCapacity() > 0 && MainActivity.userLists.size > 0) {
+                    frExecutor!!.execute(
+                        FaceRecognizeRunnable(
+                            frame.image,
+                            frame.size.width,
+                            frame.size.height,
+                            faceResults
                         )
-                    }
+                    )
                 }
             }
-            if(adjustPreview(frame.size.width, frame.size.height, frame.rotation))
+
+            if(adjustPreview())
                 sendMessage(0, faceResults)
 
         }
@@ -240,26 +233,33 @@ class CameraActivity : AppCompatActivity() {
             if(startVerifyTime == 0.toLong())
                 startVerifyTime = System.currentTimeMillis()
 
+            FaceEngine.getInstance().extractFeatureFromYuv(nv21Data, width, height, 7, faceResults)
+
             var exists = false
-            try {
-                FaceEngine.getInstance(appCtx).extractFeature(nv21Data, width, height, false, faceResults)
-                val result: SearchResult = FaceEngine.getInstance(appCtx).searchFaceFeature(FaceFeature(faceResults.get(0).feature))
-                if(result.maxSimilar > 0.82f) {
-                    for(user in MainActivity.userLists) {
-                        if(user.user_id == result.faceFeatureInfo!!.searchId && faceResults.get(0).liveness == 1) {
-                            exists = true
-                            recogName = user.userName
-                         }
-                    }
+            var maxScore = 0.0f
+            var maxScoreName: String = ""
+            for(user in MainActivity.userLists) {
+                val score = FaceEngine.getInstance().compareFeature(user.feature, faceResults.get(0).feature)
+                if(maxScore < score) {
+                    maxScore = score
+                    maxScoreName = user.userName
                 }
-            } catch (e:Exception){
+            }
+
+            if(maxScore > 78 && faceResults.get(0).liveness > LIVENESS_THRESHOLD) {
+                exists = true
+                recogName = maxScoreName
             }
 
             if(exists == true) {
                 sendMessage(1, 1)   //success
             } else {
+                var result = 0
+                if(faceResults.get(0).liveness < LIVENESS_THRESHOLD)
+                    result = -1;
+
                 if(System.currentTimeMillis() - startVerifyTime > 3000) {
-                    sendMessage(1, 0)   //fail
+                    sendMessage(1, result)   //fail
                 }
             }
         }

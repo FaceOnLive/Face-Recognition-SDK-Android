@@ -16,7 +16,6 @@ import android.hardware.Camera;
 import android.util.Log;
 
 import com.ttv.face.FaceEngine;
-import com.ttv.face.FaceFeatureInfo;
 
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -128,9 +127,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
             FaceEntity face = new FaceEntity(user_id, userName, faceImg, featureData);
             MainActivity.userLists.add(face);
-
-            FaceFeatureInfo faceFeatureInfo = new FaceFeatureInfo(user_id, featureData);
-            FaceEngine.getInstance(appCtx).registerFaceFeature(faceFeatureInfo);
 
             res.moveToNext();
         }
