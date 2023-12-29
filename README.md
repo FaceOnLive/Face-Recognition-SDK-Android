@@ -11,7 +11,7 @@ Make sure to check it out at https://getapi.faceonlive.com and take advantage of
 <a target="_blank" href="mailto:contact@faceonlive.com"><img src="https://img.shields.io/badge/email-contact@faceonlive.com-blue.svg?logo=gmail " alt="www.faceonlive.com"></a>&emsp;
 <a target="_blank" href="https://t.me/faceonlive"><img src="https://img.shields.io/badge/telegram-@faceonlive-blue.svg?logo=telegram " alt="www.faceonlive.com"></a>&emsp;
 <a target="_blank" href="https://wa.me/+17074043606"><img src="https://img.shields.io/badge/whatsapp-faceonlive-blue.svg?logo=whatsapp " alt="www.faceonlive.com"></a>&emsp;
-<a target="_blank" href="skype:demidemi1125?chat"><img src="https://img.shields.io/badge/skype-demidemi1125-blue.svg?logo=skype " alt="www.faceonlive.com"></a>
+<a target="_blank" href="https://huggingface.co/spaces/FaceOnLive/Face-Liveness-Detection-SDK"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue" alt="www.faceonlive.com"></a>
 </p>
 
 ## :muscle:  Partnership / Cooperation / Project Discussion
@@ -26,6 +26,9 @@ Make sure to check it out at https://getapi.faceonlive.com and take advantage of
 </br>
 </br>
 
+#
+Integrated into [Huggingface Spaces 🤗](https://huggingface.co/spaces) using [Gradio](https://github.com/gradio-app/gradio). Try out the Web Demo: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/FaceOnLive/Face-Recognition-SDK)
+#
 
 https://user-images.githubusercontent.com/91896009/137511577-57d95888-0157-44aa-98d6-9fda2154d638.mp4
 
