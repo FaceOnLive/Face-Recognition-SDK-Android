@@ -18,6 +18,8 @@ import com.ttv.face.*
 import io.fotoapparat.Fotoapparat
 import io.fotoapparat.parameter.Resolution
 import io.fotoapparat.preview.Frame
+import io.fotoapparat.selector.back
+import io.fotoapparat.selector.external
 import io.fotoapparat.selector.front
 import io.fotoapparat.view.CameraView
 import io.fotoapparat.util.FrameProcessor
@@ -39,6 +41,7 @@ class CameraActivity : AppCompatActivity() {
     private var startVerifyTime: Long = 0
     private var mydb: DBHelper? = null
     private var recogName:String = ""
+    private var recogID:Int=0
     private val LIVENESS_THRESHOLD: Float = 0.7f
 
     private val mHandler: Handler = object : Handler() {
@@ -68,6 +71,7 @@ class CameraActivity : AppCompatActivity() {
                 val intent = Intent()
                 intent.putExtra("verifyResult", verifyResult);
                 intent.putExtra("verifyName", recogName)
+                intent.putExtra("verifyId", recogID)
                 setResult(RESULT_OK, intent)
                 finish()
             }
@@ -93,7 +97,7 @@ class CameraActivity : AppCompatActivity() {
 
         frontFotoapparat = Fotoapparat.with(this)
             .into(cameraView!!)
-            .lensPosition(front())
+            .lensPosition(external())
             .frameProcessor(SampleFrameProcessor())
             .previewResolution { Resolution(1280,720) }
             .build()
@@ -238,17 +242,20 @@ class CameraActivity : AppCompatActivity() {
             var exists = false
             var maxScore = 0.0f
             var maxScoreName: String = ""
+            var maxScoreId:Int=0
             for(user in MainActivity.userLists) {
                 val score = FaceEngine.getInstance().compareFeature(user.feature, faceResults.get(0).feature)
                 if(maxScore < score) {
                     maxScore = score
                     maxScoreName = user.userName
+                    maxScoreId = user.user_id
                 }
             }
 
             if(maxScore > 78 && faceResults.get(0).liveness > LIVENESS_THRESHOLD) {
                 exists = true
                 recogName = maxScoreName
+                recogID  = maxScoreId
             }
 
             if(exists == true) {

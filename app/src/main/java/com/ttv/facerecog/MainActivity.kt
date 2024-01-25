@@ -41,8 +41,8 @@ class MainActivity : AppCompatActivity(){
         context = this
         FaceEngine.createInstance(this)
         var ret = FaceEngine.getInstance().setActivation("{\n" +
-                "  \"licenseKey\": \"eyJQcm9kdWN0SWQiOjIwNzg1LCJJRCI6MSwiS2V5IjoiTVlMQ08tU0JVREQtUFhRSlctSklNRVoiLCJDcmVhdGVkIjoxNjg4NTI3Mzc0LCJFeHBpcmVzIjoxNzA1ODA3Mzc0LCJQZXJpb2QiOjIwMCwiRjEiOnRydWUsIkYyIjpmYWxzZSwiRjMiOmZhbHNlLCJGNCI6ZmFsc2UsIkY1IjpmYWxzZSwiRjYiOmZhbHNlLCJGNyI6ZmFsc2UsIkY4IjpmYWxzZSwiTm90ZXMiOm51bGwsIkJsb2NrIjpmYWxzZSwiR2xvYmFsSWQiOjM1OTQxMSwiQ3VzdG9tZXIiOm51bGwsIkFjdGl2YXRlZE1hY2hpbmVzIjpbeyJNaWQiOiJjb20udHR2LmZhY2VkZW1vIiwiSVAiOiI4OC45OS4xNDUuNyIsIlRpbWUiOjE2ODg1Mjc0NDR9XSwiVHJpYWxBY3RpdmF0aW9uIjpmYWxzZSwiTWF4Tm9PZk1hY2hpbmVzIjoxLCJBbGxvd2VkTWFjaGluZXMiOiIiLCJEYXRhT2JqZWN0cyI6W10sIlNpZ25EYXRlIjoxNjg4NTI3NDQ0fQ==\",\n" +
-                "  \"signature\": \"DzA6tC4ByQqtmJvLltg8eDNsGUNZLqV2vEjwSZESjDFPQnI0QN/h+s8Pr0teZ0fg5rfEQ6JV0YXy0crB3k8OXLYLHaqKWZG/gQp4XSzj7o+2lFZWFQMqsyBb/0c8fZx3AoILEqGa8xoDWiibE21aeAVfdAUaGODBZnFRA9ytdsvesInyyzKZmjtHjKDR0MLgIBk3QJKxXaI+RU2NoV7UDrruOoGXeljvjjiwOispmxGPTYri9QkDeQyGcmer3+BeAFKmvd6xWOzHGp53wv7VYIC42ETU6hxvVZqAFJ2ujvtvzIzpZ615Qq1eVyFljCU2u0Clfb2oTsoefyKhLlLQTQ==\",\n" +
+                "  \"licenseKey\": \"eyJQcm9kdWN0SWQiOjIwNzg1LCJJRCI6OCwiS2V5IjoiRFJFQUQtR0NCT04tWExJSlctVU5BQ00iLCJDcmVhdGVkIjoxNzAwNTM2Mjc3LCJFeHBpcmVzIjoxNzA2NzAyOTM2LCJQZXJpb2QiOjIzLCJGMSI6dHJ1ZSwiRjIiOmZhbHNlLCJGMyI6ZmFsc2UsIkY0IjpmYWxzZSwiRjUiOmZhbHNlLCJGNiI6ZmFsc2UsIkY3IjpmYWxzZSwiRjgiOmZhbHNlLCJOb3RlcyI6bnVsbCwiQmxvY2siOmZhbHNlLCJHbG9iYWxJZCI6NDAxNTU0LCJDdXN0b21lciI6bnVsbCwiQWN0aXZhdGVkTWFjaGluZXMiOlt7Ik1pZCI6ImNvbS5vbGFtLnNtYXJ0ZmFybXMiLCJJUCI6Ijk2LjQ0LjE2MS40IiwiVGltZSI6MTcwMDUzNjM4N31dLCJUcmlhbEFjdGl2YXRpb24iOmZhbHNlLCJNYXhOb09mTWFjaGluZXMiOjIsIkFsbG93ZWRNYWNoaW5lcyI6IiIsIkRhdGFPYmplY3RzIjpbXSwiU2lnbkRhdGUiOjE3MDQ3MTU3NTF9\",\n" +
+                "  \"signature\": \"kR1Fse5b+P1sQiz3nuyqcyHAIcUScB+skqTt5+mIpPj3Ac/3+WRQkEsTdVXNelFkNqd7yb/F4zFrotJMJ1b3kyS4hn8j0IHrHF6pA32aw7VbDVgRyUAJWbDbzOAp8dRy7NlMPy3TPUOVDL5bi7UaH7NBp4nhfw/XrSGQEKqq+0EBvErUhRw7bRQHEjHfzbnyanxpWp6LWjo+5RXUWYWXC3bMu4UgBF/RRJUMRc+7YFUL1t6Ss8I3ihmLqMtFoNXmwqrdGZF+RsFlP/7yc2SPPnSbxjSwE6yQAPTjbC85vJFYm2G6p948Y7Wsh1pC6hGRGetyjwd9EA09rnxGsfNm1w==\",\n" +
                 "  \"result\": 0,\n" +
                 "  \"message\": \"\"\n" +
                 "}")
@@ -60,14 +60,19 @@ class MainActivity : AppCompatActivity(){
             val txtInit = findViewById<TextView>(R.id.txtInit)
             txtInit.visibility = View.VISIBLE
 
-            if(ret == FaceEngine.F_LICENSE_APPID_ERROR) {
-                txtInit.text = "AppID Error!"
-            } else if(ret == FaceEngine.F_LICENSE_KEY_ERROR) {
-                txtInit.text = "License Key Error!"
-            } else if(ret == FaceEngine.F_LICENSE_EXPIRED) {
-                txtInit.text = "License Expired!"
-            } else if(ret == FaceEngine.F_INIT_ERROR) {
-                txtInit.text = "Init Error!"
+            when (ret) {
+                FaceEngine.F_LICENSE_APPID_ERROR -> {
+                    txtInit.text = "AppID Error!"
+                }
+                FaceEngine.F_LICENSE_KEY_ERROR -> {
+                    txtInit.text = "License Key Error!"
+                }
+                FaceEngine.F_LICENSE_EXPIRED -> {
+                    txtInit.text = "License Expired!"
+                }
+                FaceEngine.F_INIT_ERROR -> {
+                    txtInit.text = "Init Error!"
+                }
             }
         }
 
@@ -165,14 +170,21 @@ class MainActivity : AppCompatActivity(){
                 //handle exception
                 e.printStackTrace()
             }
-        } else if(requestCode == 2 && resultCode == RESULT_OK) {
+        }
+        else if(requestCode == 2 && resultCode == RESULT_OK) {
             val verifyResult = data!!.getIntExtra ("verifyResult", 0)
-            if(verifyResult == 1) {
-                Toast.makeText(this, "Verify succeed!", Toast.LENGTH_SHORT).show()
-            } else if(verifyResult == -1) {
-                Toast.makeText(this, "Liveness failed!", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Verify failed!", Toast.LENGTH_SHORT).show()
+            when (verifyResult) {
+                1 -> {
+                    val  verifyUserId = data.getIntExtra("verifyId",0)
+                    val  verifyName = data.getStringExtra("verifyName")?:""
+                    Toast.makeText(this, "Verify succeed! for user Id is $verifyUserId $verifyName", Toast.LENGTH_SHORT).show()
+                }
+                -1 -> {
+                    Toast.makeText(this, "Liveness failed!", Toast.LENGTH_SHORT).show()
+                }
+                else -> {
+                    Toast.makeText(this, "Verify failed!", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
