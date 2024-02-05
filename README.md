@@ -210,7 +210,7 @@ F_INIT_ERROR = -4,
   ```
   import com.ttv.face.FaceEngine;
   ...
-  float score = FaceEngine.getInstance(this).livenessProcess(bitmap, faceResults);
+  int ret = FaceEngine.getInstance(this).livenessProcess(bitmap, faceResults);
   ```
 #### - Check liveness from yuv data
   ```
@@ -224,7 +224,7 @@ F_INIT_ERROR = -4,
   ```
   import com.ttv.face.FaceEngine;
   ...
-  float score = FaceEngine.getInstance(this).livenessProcess(nv21, width, height, faceResults);
+  int ret = FaceEngine.getInstance(this).livenessProcess(nv21, width, height, faceResults);
   ```
 #### - Get facial attribute(Gender, Age, Yaw, Roll, Pitch, Mask) from bitmap
   ```
@@ -238,7 +238,7 @@ F_INIT_ERROR = -4,
   ```
   import com.ttv.face.FaceEngine;
   ...
-  float score = FaceEngine.getInstance(this).faceAttrProcess(bitmap, faceResults);
+  int ret = FaceEngine.getInstance(this).faceAttrProcess(bitmap, faceResults);
   ```
 #### - Get facial attribute(Gender, Age, Yaw, Roll, Pitch, Mask) from yuv data
   ```
@@ -252,7 +252,7 @@ F_INIT_ERROR = -4,
   ```
   import com.ttv.face.FaceEngine;
   ...
-  float score = FaceEngine.getInstance(this).faceAttrProcess(nv21, width, height, faceResults);
+  int ret = FaceEngine.getInstance(this).faceAttrProcess(nv21, width, height, faceResults);
   ```
 #### - Process all(Extract Feature, Liveness, Gender, Age, Yaw, Roll, Pitch, Mask) from bitmap
   ```
@@ -266,7 +266,7 @@ F_INIT_ERROR = -4,
   ```
   import com.ttv.face.FaceEngine;
   ...
-  float score = FaceEngine.getInstance(this).faceAllProcess(bitmap, faceResults);
+  int ret = FaceEngine.getInstance(this).faceAllProcess(bitmap, faceResults);
   ```
 #### - Process all(Extract Feature, Liveness, Gender, Age, Yaw, Roll, Pitch, Mask) from yuv data
   ```
@@ -280,5 +280,5 @@ F_INIT_ERROR = -4,
   ```
   import com.ttv.face.FaceEngine;
   ...
-  float score = FaceEngine.getInstance(this).faceAllProcess(nv21, width, height, faceResults);
+  int ret = FaceEngine.getInstance(this).faceAllProcess(nv21, width, height, faceResults);
   ```
