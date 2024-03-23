@@ -1,5 +1,5 @@
 ✨ _**Update (Mar 1, 2024):**_
-Introduce **OpenKYC Community Project**, build your own eKYC solution and contribute at this [Github Repo](https://github.com/FaceOnLive/OpenKYC), try at [HuggingFace Space](https://huggingface.co/spaces/FaceOnLive/OpenKYC).
+Introduce **OpenKYC Community Project**, build your own eKYC solution and contribute at this [https://github.com/FaceOnLive/OpenKYC](https://github.com/FaceOnLive/OpenKYC).
 
 ✨ _**Update (Oct 26, 2023):**_
 We are on Hugging Face, get your own SDK Servers by duplicating spaces at https://huggingface.co/FaceOnLive.
