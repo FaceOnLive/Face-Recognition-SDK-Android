@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">FaceDemo</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="setting">Settings</string>
+    <string name="flip_camera">Flip Camera</string>
+
+    <!-- Preference Titles -->
+    <string name="camera">Camera</string>
+    <string name="thresholds">Thresholds</string>
+    <string name="reset">Reset</string>
+
+    <!-- Messages Preferences -->
+    <string name="liveness_threshold">Liveness threshold</string>
+    <string name="liveness_model">Liveness model</string>
+    <string name="match_threshold">Matching threshold</string>
+    <string name="reset_default_settings">Reset settings</string>
+    <string name="remove_all_users">Remove registered users</string>
+
+    <string name="choose_photo">Choose photo</string>
+
+    <string name="multiple_face_detected">Multiple faces detected!</string>
+    <string name="no_face">No face!</string>
+    <string name="user_registered">Registered user successfully!</string>
+    <string name="liveness_check_failed">Liveness check failed!</string>
+    <string name="reseted_default_settings">Reset to default settings</string>
+    <string name="removed_all_users">Removed all users</string>
+    <string name="set_failure">Setting failed!</string>
+
+</resources>

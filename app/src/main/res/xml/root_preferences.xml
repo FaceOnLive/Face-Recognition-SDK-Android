@@ -1,0 +1,36 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <EditTextPreference
+        app:defaultValue="0.8"
+        app:key="match_threshold"
+        app:title="@string/match_threshold"
+        app:layout="@layout/custom_preference_item"
+        app:useSimpleSummaryProvider="true" />
+
+    <EditTextPreference
+        app:defaultValue="0.7"
+        app:key="liveness_threshold"
+        app:singleLineTitle="false"
+        app:title="@string/liveness_threshold"
+        app:layout="@layout/custom_preference_item"
+        app:useSimpleSummaryProvider="true" />
+
+    <ListPreference
+        app:defaultValue="0"
+        app:entries="@array/liveness_model"
+        app:entryValues="@array/liveness_model_values"
+        app:key="liveness_model"
+        app:title="@string/liveness_model"
+        app:layout="@layout/custom_preference_item"
+        app:useSimpleSummaryProvider="true" />
+
+    <Preference
+        app:key="restore_default_settings"
+        app:layout="@layout/custom_preference_item"
+        app:title="@string/reset_default_settings" />
+
+    <Preference
+        app:key="clear_all_person"
+        app:layout="@layout/custom_preference_item"
+        app:title="@string/remove_all_users" />
+
+</PreferenceScreen>

@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ResultActivity">
+
+    <TextView
+        android:id="@+id/txtTitle"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="Identification Result"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"></TextView>
+
+    <LinearLayout
+        android:id="@+id/lytIdentification_result"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginTop="50dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:textAlignment="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtTitle">
+
+        <LinearLayout
+            android:layout_width="140dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="140dp"
+                android:layout_height="140dp"
+                app:cardBackgroundColor="@color/buttonBackgroundColor"
+                app:cardCornerRadius="70dp">
+
+                <com.bio.facerecognition.CircleImageView
+                    android:id="@+id/imageIdentified"
+                    android:layout_width="136dp"
+                    android:layout_height="136dp"
+                    android:layout_margin="2dp"></com.bio.facerecognition.CircleImageView>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Identified"></TextView>
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp">
+
+            <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                android:id="@+id/similarityBar"
+                android:layout_width="70dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal|center_vertical"
+                app:cpb_background_progressbar_color="#b6bbd8"
+                app:cpb_background_progressbar_width="5dp"
+                app:cpb_progress_direction="to_right"
+                app:cpb_progressbar_color="#3f51b5"
+                app:cpb_progressbar_width="10dp"
+                app:cpb_round_border="false" />
+
+            <TextView
+                android:id="@+id/textSimilarityScore"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="85%"
+                android:textColor="@color/primaryTextColor"
+                android:textSize="16sp" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/lytIdentyResult"
+            android:layout_width="140dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:orientation="vertical">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="140dp"
+                android:layout_height="140dp"
+                app:cardBackgroundColor="@color/buttonBackgroundColor"
+                app:cardCornerRadius="70dp">
+
+                <com.bio.facerecognition.CircleImageView
+                    android:id="@+id/imageEnrolled"
+                    android:layout_width="136dp"
+                    android:layout_height="136dp"
+                    android:layout_margin="2dp"></com.bio.facerecognition.CircleImageView>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/txtUserName"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Enrolled"></TextView>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lytLiveness"
+        android:layout_width="230dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:textAlignment="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lytIdentification_result">
+
+        <TextView
+            android:id="@+id/textLiveness_lbl"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Liveness score: "
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18dp"></TextView>
+
+        <TextView
+            android:id="@+id/textLiveness"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lytYaw"
+        android:layout_width="230dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lytLiveness">
+
+        <TextView
+            android:id="@+id/textYaw_lbl"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Yaw: "
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18dp"></TextView>
+
+        <TextView
+            android:id="@+id/textYaw"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lytRoll"
+        android:layout_width="230dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lytYaw">
+
+        <TextView
+            android:id="@+id/textRoll_lbl"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Roll: "
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18dp"></TextView>
+
+        <TextView
+            android:id="@+id/textRoll"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lytPitch"
+        android:layout_width="230dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lytRoll">
+
+        <TextView
+            android:id="@+id/textPitch_lbl"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Pitch: "
+            android:textColor="@color/primaryTextColor"
+            android:textSize="18dp"></TextView>
+
+        <TextView
+            android:id="@+id/textPitch"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnEnd"
+        style="@style/ButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="54dp"
+        android:layout_marginStart="64dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginBottom="64dp"
+        android:text="Try again"
+        app:cornerRadius="27dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

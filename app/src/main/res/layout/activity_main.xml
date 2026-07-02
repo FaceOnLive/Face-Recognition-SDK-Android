@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundColor"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/imageTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="126dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/title" />
+
+    <ImageButton
+        android:id="@+id/buttonSetting"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@color/backgroundColor"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_setting"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/lytButtons1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/imageTitle"
+        tools:layout_editor_absoluteX="16dp">
+
+        <Button
+            android:id="@+id/buttonEnroll"
+            style="@style/ButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_marginRight="10dp"
+            android:layout_weight="0.5"
+            android:text="Register"
+            app:cornerRadius="27dp"
+            app:iconTint="@color/buttonTextColor" />
+
+        <Button
+            android:id="@+id/buttonIdentify"
+            style="@style/ButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="0.5"
+            android:text="Identify"
+            app:cornerRadius="27dp" />
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/listPerson"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lytButtons1" />
+
+    <TextView
+        android:id="@+id/textWarning"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/md_theme_light_error"
+        android:gravity="center"
+        android:text=""
+        android:textColor="@color/buttonTextColor"
+        android:textSize="14dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/listPerson"
+        app:layout_constraintEnd_toEndOf="@+id/listPerson"
+        app:layout_constraintStart_toStartOf="@+id/listPerson">
+
+    </TextView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

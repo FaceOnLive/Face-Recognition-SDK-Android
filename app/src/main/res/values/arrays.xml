@@ -1,0 +1,13 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="liveness_model">
+        <item>v1</item>
+        <item>v2-fast</item>
+    </string-array>
+
+    <string-array name="liveness_model_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+</resources>
